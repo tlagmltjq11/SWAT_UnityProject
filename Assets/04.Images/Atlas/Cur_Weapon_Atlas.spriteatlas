@@ -1,0 +1,57 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!687078895 &4343727234628468602
+SpriteAtlas:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: Cur_Weapon_Atlas
+  m_EditorData:
+    serializedVersion: 2
+    textureSettings:
+      serializedVersion: 2
+      anisoLevel: 1
+      compressionQuality: 50
+      maxTextureSize: 2048
+      textureCompression: 0
+      filterMode: 1
+      generateMipMaps: 0
+      readable: 0
+      crunchedCompression: 0
+      sRGB: 1
+    platformSettings: []
+    packingSettings:
+      serializedVersion: 2
+      padding: 4
+      blockOffset: 1
+      allowAlphaSplitting: 0
+      enableRotation: 1
+      enableTightPacking: 1
+    variantMultiplier: 1
+    packables:
+    - {fileID: 21300000, guid: e0bea800849e2944d9407b49fa0b8ced, type: 2}
+    - {fileID: 21300000, guid: d84f6242b15ddce41995d91c9fde657d, type: 2}
+    - {fileID: 21300000, guid: e2ce3cae15808fc4ea41d69c399c9d15, type: 2}
+    - {fileID: 21300000, guid: 975bfcf06ad43f747beaaf94d3633138, type: 2}
+    - {fileID: 21300000, guid: 23693a482399dd94ab1c39c39b4a3da2, type: 2}
+    - {fileID: 21300000, guid: 13470b0fa045d4a4bb8e8a6775bdb71c, type: 2}
+    totalSpriteSurfaceArea: 162878
+    bindAsDefault: 1
+  m_MasterAtlas: {fileID: 0}
+  m_PackedSprites:
+  - {fileID: 21300000, guid: 13470b0fa045d4a4bb8e8a6775bdb71c, type: 2}
+  - {fileID: 21300000, guid: 23693a482399dd94ab1c39c39b4a3da2, type: 2}
+  - {fileID: 21300000, guid: 975bfcf06ad43f747beaaf94d3633138, type: 2}
+  - {fileID: 21300000, guid: d84f6242b15ddce41995d91c9fde657d, type: 2}
+  - {fileID: 21300000, guid: e0bea800849e2944d9407b49fa0b8ced, type: 2}
+  - {fileID: 21300000, guid: e2ce3cae15808fc4ea41d69c399c9d15, type: 2}
+  m_PackedSpriteNamesToIndex:
+  - HealthPack
+  - Smoke
+  - Grenade
+  - Glock19
+  - AKM
+  - AWM
+  m_Tag: Cur_Weapon_Atlas
+  m_IsVariant: 0
