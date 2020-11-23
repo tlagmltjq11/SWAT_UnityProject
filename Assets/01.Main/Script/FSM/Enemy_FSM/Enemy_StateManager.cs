@@ -29,6 +29,7 @@ public class Enemy_StateManager : FSM<Enemy_StateManager>
 
     public Transform m_wayPointObj;
     public Transform[] m_wayPoints;
+    public bool m_isStayPos;
     #endregion
 
     #region Unity Methods
@@ -131,6 +132,9 @@ public class Enemy_StateManager : FSM<Enemy_StateManager>
 
         int layerMask = ((1 << LayerMask.NameToLayer("Enemy")) | (1 << LayerMask.NameToLayer("Sfx")) | (1 << LayerMask.NameToLayer("Interactable")) | (1 << LayerMask.NameToLayer("Enemy_ExplosionHitCol")));
         layerMask = ~layerMask;
+
+        Vector3 dir = new Vector3(m_player.transform.position.x, m_player.transform.position.y + 0.2f, m_player.transform.position.z) - m_shootPoint.transform.position;
+        m_shootPoint.transform.forward = dir.normalized;
 
         if (Physics.Raycast(m_shootPoint.transform.position, m_shootPoint.transform.forward + Random.onUnitSphere * 0.05f, out hit, 100f, layerMask))
         {

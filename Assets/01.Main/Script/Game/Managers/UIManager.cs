@@ -20,6 +20,7 @@ public class UIManager : SingletonMonoBehaviour<UIManager>
     public Image m_curATWImg;
     public GameObject m_progressObj;
     public Image m_progressBar;
+    public Text m_missionText;
     [SerializeField]
     GameObject m_UIDIe;
     #endregion
@@ -27,9 +28,34 @@ public class UIManager : SingletonMonoBehaviour<UIManager>
     protected override void OnStart()
     {
         m_progressObj.SetActive(false);
+        Invoke("MissionTextOff", 5f);
+    }
+
+    void Update()
+    {
+        if(Input.GetKeyDown(KeyCode.F1))
+        {
+            MissionTextOn();
+            CancelInvoke();
+        }
+
+        if(Input.GetKeyUp(KeyCode.F1))
+        {
+            MissionTextOff();
+        }
     }
 
     #region Public Methods
+    public void MissionTextOn()
+    {
+        m_missionText.enabled = true;
+    }
+
+    public void MissionTextOff()
+    {
+        m_missionText.enabled = false;
+    }
+
     public void Update_Bullet(float currentBullets, float bulletsRemain)
     {
         m_bulletText.text = currentBullets + " / " + bulletsRemain;

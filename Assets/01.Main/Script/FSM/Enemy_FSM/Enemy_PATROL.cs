@@ -18,6 +18,11 @@ public class Enemy_PATROL : FSMSingleton<Enemy_PATROL>, IFSMState<Enemy_StateMan
     {
         if (!e.SearchTarget())
         {
+            if(e.m_isStayPos)
+            {
+                return;
+            }
+
             if (!e.m_navAgent.hasPath)
             {
                 if(e.m_wayPointObj != null)

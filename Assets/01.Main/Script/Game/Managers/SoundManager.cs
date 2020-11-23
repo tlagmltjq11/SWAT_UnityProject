@@ -42,6 +42,8 @@ public class SoundManager : SingletonMonoBehaviour<SoundManager>
         ATW_CHANGE,
         HEALTH_SUPPLY,
         UNTIE_HOSTAGE,
+        FLASH_ON,
+        FLASH_OFF,
         MAX
     }
 

@@ -29,6 +29,7 @@ public class Player_StateManager : FSM<Player_StateManager>
     public Weapon m_currentWeapon;
     public ATW m_currentATW;
     public GameObject m_upperBodyLean;
+    public Light m_flashLight;
     #endregion
     #region Player Info
     //Player Info
@@ -74,11 +75,6 @@ public class Player_StateManager : FSM<Player_StateManager>
     public eWeaponType m_WPType;
     #endregion
     #endregion
-
-    private void OnDrawGizmos()
-    {
-        Gizmos.DrawSphere(m_groundCheck.position, m_groundDistance);
-    }
 
     #region Unity Methods
     void Start() 
@@ -200,6 +196,21 @@ public class Player_StateManager : FSM<Player_StateManager>
             }
         }
         #endregion
+        #region FlashLight
+        if(Input.GetKeyDown(KeyCode.Y))
+        {
+            if(!m_flashLight.enabled)
+            {
+                m_flashLight.enabled = true;
+                SoundManager.Instance.Play2DSound(SoundManager.eAudioClip.FLASH_ON, 1f);
+            }
+            else
+            {
+                m_flashLight.enabled = false;
+                SoundManager.Instance.Play2DSound(SoundManager.eAudioClip.FLASH_OFF, 1f);
+            }
+        }
+        #endregion
     }
     #endregion
 
@@ -218,6 +229,7 @@ public class Player_StateManager : FSM<Player_StateManager>
         m_isLeanQ = false;
         m_isLeanE = false;
         m_isLeanDouble = false;
+        m_flashLight.enabled = false;
 
         // Default Weapon Setting.
         for (int i=0; i<m_weapons.Length; i++)

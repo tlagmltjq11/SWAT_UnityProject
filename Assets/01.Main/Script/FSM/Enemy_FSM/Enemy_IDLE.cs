@@ -25,12 +25,12 @@ public class Enemy_IDLE : FSMSingleton<Enemy_IDLE>, IFSMState<Enemy_StateManager
                 {
                     e.ChangeState(Enemy_ATTACK.Instance);
                 }
-                else
+                else if(!e.m_isStayPos)
                 {
                     e.ChangeState(Enemy_RUN.Instance);
                 }
             }
-            else
+            else if(!e.m_isStayPos)
             {
                 e.ChangeState(Enemy_PATROL.Instance);
             }
