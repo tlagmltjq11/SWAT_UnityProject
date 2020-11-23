@@ -12,7 +12,7 @@ public class ATW_Grenade : ATW
         m_timeToOper = 3f;
         m_name = "Grenade";
         m_power = 6.5f;
-        m_explosionRadius = 15f;
+        m_explosionRadius = 5f;
     }
 
     private void OnCollisionEnter(Collision collision)
@@ -55,24 +55,42 @@ public class ATW_Grenade : ATW
 
             if(hit.transform.root.gameObject.layer.Equals(LayerMask.NameToLayer("Enemy")))
             {
+                RaycastHit check;
+                var dir = hit.transform.position - gameObject.transform.position;
+                int layer = (1 << LayerMask.NameToLayer("Ground")) | (1 << LayerMask.NameToLayer("Interactable")) | (1 << LayerMask.NameToLayer("Movable"));
+                if(Physics.Raycast(gameObject.transform.position, dir.normalized, out check, m_explosionRadius, layer))
+                {
+                    Debug.Log(check.transform.name);
+                    continue;
+                }
+
                 var enemy = hit.transform.GetComponentInParent<Enemy_StateManager>();
 
                 enemy.Damaged(100 * (m_power / distance));
                 Debug.Log(100 * (m_power / distance));
 
-                if(enemy.m_hp <= 0) //대상이 죽은 상태라면
+                if (enemy.m_hp <= 0) //대상이 죽은 상태라면
                 {
                     var rigs = enemy.transform.root.gameObject.GetComponentsInChildren<Rigidbody>();
-                    
-                    foreach(Rigidbody rig in rigs)
+
+                    foreach (Rigidbody rig in rigs)
                     {
                         rig.AddExplosionForce(500 * (m_power / distance), gameObject.transform.position, m_explosionRadius, 8f);
                     }
                 }
+
             }
-            else
+            else if(hit.transform.gameObject.layer.Equals(LayerMask.NameToLayer("Movable")))
             {
-                hit.transform.GetComponent<Rigidbody>().AddExplosionForce(100 * (m_power / distance), gameObject.transform.position, m_explosionRadius, 5f);
+                Crash_Box cb = hit.transform.gameObject.GetComponent<Crash_Box>();
+                cb.Crash();
+
+                var rigs = hit.transform.GetComponentsInChildren<Rigidbody>();
+
+                foreach (Rigidbody rig in rigs)
+                {
+                    rig.AddExplosionForce(100 * (m_power / distance), gameObject.transform.position, m_explosionRadius, 5f);
+                }
             }
         }
 

@@ -189,7 +189,7 @@ public class Weapon_GLOCK : Weapon
 
 					if (rig)
 					{
-						rig.AddForceAtPosition(m_shootPoint.forward * m_power * 5f, m_shootPoint.position);
+						rig.AddForceAtPosition(m_shootPoint.forward * m_power * 50f, m_shootPoint.position);
 					}
 				}
 			}

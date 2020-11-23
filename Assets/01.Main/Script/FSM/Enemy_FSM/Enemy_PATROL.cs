@@ -20,20 +20,29 @@ public class Enemy_PATROL : FSMSingleton<Enemy_PATROL>, IFSMState<Enemy_StateMan
         {
             if (!e.m_navAgent.hasPath)
             {
-                //랜덤 패트롤링
-                NavMeshHit hit;
-                Vector3 finalPosition = Vector3.zero;
-                Vector3 randomDirection = Random.insideUnitSphere * 5f;
-                randomDirection += e.gameObject.transform.position;
-
-                //randomDirection위치에 navMesh가 존재하여 갈 수 있는지 체크
-                if (NavMesh.SamplePosition(randomDirection, out hit, 1f, 1))
+                if(e.m_wayPointObj != null)
                 {
-                    finalPosition = hit.position;
+                    e.m_anim.SetBool("ISWALK", true);
+                    e.m_navAgent.SetDestination(e.m_wayPoints[Random.Range(1, e.m_wayPoints.Length)].position);
                 }
+                else
+                {
+                    //랜덤 패트롤링
+                    NavMeshHit hit;
+                    Vector3 finalPosition = Vector3.zero;
+                    Vector3 randomDirection = Random.insideUnitSphere * 5f;
+                    randomDirection.y = 0f;
+                    randomDirection += e.gameObject.transform.position;
 
-                e.m_anim.SetBool("ISWALK", true);
-                e.m_navAgent.SetDestination(finalPosition);
+                    //randomDirection위치에 navMesh가 존재하여 갈 수 있는지 체크
+                    if (NavMesh.SamplePosition(randomDirection, out hit, 1f, 1))
+                    {
+                        finalPosition = hit.position;
+                    }
+
+                    e.m_anim.SetBool("ISWALK", true);
+                    e.m_navAgent.SetDestination(finalPosition);
+                }
             }
             else
             {
@@ -44,12 +53,12 @@ public class Enemy_PATROL : FSMSingleton<Enemy_PATROL>, IFSMState<Enemy_StateMan
                 {
                     if (e.m_footstepTurn == 0)
                     {
-                        SoundManager.Instance.Play3DSound(SoundManager.eAudioClip.FOOTSTEP3, e.gameObject.transform.position, 15f, 1f);
+                        SoundManager.Instance.Play3DSound(SoundManager.eAudioClip.FOOTSTEP3, e.gameObject.transform.position, 8f, 1f);
                         e.m_footstepTurn = 1;
                     }
                     else if (e.m_footstepTurn == 1)
                     {
-                        SoundManager.Instance.Play3DSound(SoundManager.eAudioClip.FOOTSTEP4, e.gameObject.transform.position, 15f, 1f);
+                        SoundManager.Instance.Play3DSound(SoundManager.eAudioClip.FOOTSTEP4, e.gameObject.transform.position, 8f, 1f);
                         e.m_footstepTurn = 0;
                     }
 

@@ -26,6 +26,9 @@ public class Enemy_StateManager : FSM<Enemy_StateManager>
     public float m_hp;
     public float m_bullets;
     public int m_footstepTurn = 0;
+
+    public Transform m_wayPointObj;
+    public Transform[] m_wayPoints;
     #endregion
 
     #region Unity Methods
@@ -43,7 +46,10 @@ public class Enemy_StateManager : FSM<Enemy_StateManager>
 
     void Start()
     {
-
+        if(m_wayPointObj != null)
+        {
+            m_wayPoints = m_wayPointObj.GetComponentsInChildren<Transform>();
+        }
     }
 
     void Update()
@@ -195,6 +201,15 @@ public class Enemy_StateManager : FSM<Enemy_StateManager>
         else
         {
             m_hp = m_hp - dmg;
+
+            if(canAttack())
+            {
+                ChangeState(Enemy_ATTACK.Instance);
+            }
+            else
+            {
+                ChangeState(Enemy_RUN.Instance);
+            }
         }
     }
 

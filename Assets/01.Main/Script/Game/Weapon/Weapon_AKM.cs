@@ -199,7 +199,7 @@ public class Weapon_AKM : Weapon
 
 					if (rig)
 					{
-						rig.AddForceAtPosition(m_shootPoint.forward * m_power * 5f, m_shootPoint.position);
+						rig.AddForceAtPosition(m_shootPoint.forward * m_power * 70f, m_shootPoint.position);
 					}
 				}
 			}
