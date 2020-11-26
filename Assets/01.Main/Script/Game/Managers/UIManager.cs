@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.U2D;
+using TMPro;
 
 public class UIManager : SingletonMonoBehaviour<UIManager>
 {
@@ -10,23 +11,25 @@ public class UIManager : SingletonMonoBehaviour<UIManager>
     [SerializeField]
     GameObject m_UIPlay;
     public GameObject m_crossHair;
-    public Text m_bulletText;
-    public Text m_remainATWText;
-    public Text m_curWeaponText;
-    public Text m_HpText;
+    public TextMeshProUGUI m_bulletText;
+    public TextMeshProUGUI m_remainATWText;
+    public TextMeshProUGUI m_curWeaponText;
+    public TextMeshProUGUI m_HpText;
     public Image m_bloodScreen;
     public SpriteAtlas m_atlas;
     public Image m_curGunImg;
     public Image m_curATWImg;
     public GameObject m_progressObj;
     public Image m_progressBar;
-    public Text m_missionText;
+    public GameObject m_missionText;
+    public GameObject m_keyStrokeEXP;
     [SerializeField]
     GameObject m_UIDIe;
     #endregion
 
     protected override void OnStart()
     {
+        m_keyStrokeEXP.SetActive(false);
         m_progressObj.SetActive(false);
         Invoke("MissionTextOff", 5f);
     }
@@ -43,17 +46,27 @@ public class UIManager : SingletonMonoBehaviour<UIManager>
         {
             MissionTextOff();
         }
+
+        if (Input.GetKeyDown(KeyCode.F2))
+        {
+            m_keyStrokeEXP.SetActive(true);
+        }
+
+        if (Input.GetKeyUp(KeyCode.F2))
+        {
+            m_keyStrokeEXP.SetActive(false);
+        }
     }
 
     #region Public Methods
     public void MissionTextOn()
     {
-        m_missionText.enabled = true;
+        m_missionText.SetActive(true);
     }
 
     public void MissionTextOff()
     {
-        m_missionText.enabled = false;
+        m_missionText.SetActive(false);
     }
 
     public void Update_Bullet(float currentBullets, float bulletsRemain)
