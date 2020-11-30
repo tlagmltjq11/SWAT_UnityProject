@@ -1606,7 +1606,7 @@ GameObject:
   - component: {fileID: 3742895219789292060}
   m_Layer: 11
   m_Name: swat:HeadTop_End
-  m_TagString: Untagged
+  m_TagString: HeadShot
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -1771,7 +1771,7 @@ GameObject:
   - component: {fileID: 3742895219963053938}
   m_Layer: 11
   m_Name: swat:Head
-  m_TagString: Untagged
+  m_TagString: HeadShot
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0

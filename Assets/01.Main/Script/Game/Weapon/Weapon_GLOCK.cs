@@ -150,7 +150,7 @@ public class Weapon_GLOCK : Weapon
 
 				if (enemy)
 				{
-					if (hit.collider.name.Equals("swat:HeadTop_End"))
+					if (hit.collider.gameObject.tag.Equals("HeadShot"))
 					{
 						SoundManager.Instance.Play2DSound(SoundManager.eAudioClip.HEADSHOT, 1.5f);
 						enemy.Damaged(m_power * 100f);

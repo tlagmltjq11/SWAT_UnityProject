@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Audio;
 
 public class SoundManager : SingletonMonoBehaviour<SoundManager>
 {
@@ -55,10 +56,27 @@ public class SoundManager : SingletonMonoBehaviour<SoundManager>
     AudioSource m_2DSoundSource_Play;
     [SerializeField]
     AudioSource m_BGMSource;
+    [SerializeField]
+    GameObject m_3dObj;
+    [SerializeField]
+    AudioSource m_helicopter;
+    [SerializeField]
+    AudioSource m_policeCar;
+    List<AudioSource> m_pausedAudios = new List<AudioSource>();
     public float m_totalVolume = 1f;
     #endregion
 
     #region Public Methods
+    public void BGMPlay()
+    {
+        m_BGMSource.Play();
+    }
+
+    public void BGMPause()
+    {
+        m_BGMSource.Pause();
+    }
+
     //PlayOneShot Method 사용
     public void Play2DSound(eAudioClip clip, float volume)
     {
@@ -113,6 +131,57 @@ public class SoundManager : SingletonMonoBehaviour<SoundManager>
             obj.gameObject.SetActive(true);
             audio.Play();
             obj.ReturnInvoke(m_clips[clip].length);
+        }
+    }
+
+    public void StopSound()
+    {
+        if(m_2DSoundSource.isPlaying)
+        {
+            m_2DSoundSource.Pause();
+            m_pausedAudios.Add(m_2DSoundSource);
+        }
+        if (m_2DSoundSource_Play.isPlaying)
+        {
+            m_2DSoundSource_Play.Pause();
+            m_pausedAudios.Add(m_2DSoundSource_Play);
+        }
+        if (m_BGMSource.isPlaying)
+        {
+            m_BGMSource.Pause();
+            m_pausedAudios.Add(m_BGMSource);
+        }
+
+        m_helicopter.Pause();
+        m_policeCar.Pause();
+
+        //3d오브젝트풀링 오디오소스들 현재 재생중인것들만 처리중
+        var sources = m_3dObj.GetComponentsInChildren<AudioSource>();
+
+        foreach(AudioSource audio in sources)
+        {
+            audio.Pause();
+        }
+    }
+
+    public void ReStartSound()
+    {
+        //퍼지된 오디오소스만 리스트에 저장해두었다가 재생시킴.
+        for(int i=0; i<m_pausedAudios.Count; i++)
+        {
+            m_pausedAudios[0].Play();
+        }
+        m_pausedAudios.Clear(); //클리어
+
+        m_helicopter.Play();
+        m_policeCar.Play();
+
+        //3d오브젝트풀링 오디오소스들 현재 재생중인것들만 처리중
+        var sources = m_3dObj.GetComponentsInChildren<AudioSource>();
+
+        foreach (AudioSource audio in sources)
+        {
+            audio.Play();
         }
     }
     #endregion

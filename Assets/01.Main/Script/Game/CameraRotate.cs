@@ -21,21 +21,8 @@ public class CameraRotate : MonoBehaviour
     #endregion
 
     #region Unity Methods
-    private void Awake()
-    {
-        //시작할때 커서 안보이게 설정.
-        Cursor.lockState = CursorLockMode.Locked;
-        Cursor.visible = false;
-    }
-
     void Update()
     {
-        if (Input.GetKeyDown(KeyCode.Escape))
-        {
-            Cursor.lockState = CursorLockMode.None;
-            Cursor.visible = true;
-        }
-
         MouseLook();
     }
     #endregion

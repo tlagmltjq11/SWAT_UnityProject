@@ -23,15 +23,19 @@ public class UIManager : SingletonMonoBehaviour<UIManager>
     public Image m_progressBar;
     public GameObject m_missionText;
     public GameObject m_keyStrokeEXP;
+    public TextMeshProUGUI m_timerText;
+    public TextMeshProUGUI m_startText;
     [SerializeField]
     GameObject m_UIDIe;
+    public int m_leftTime; // 스테이지 정보로 받아와야함.
     #endregion
 
     protected override void OnStart()
     {
         m_keyStrokeEXP.SetActive(false);
         m_progressObj.SetActive(false);
-        Invoke("MissionTextOff", 5f);
+        StartCoroutine("startGame");
+        m_leftTime = 180;
     }
 
     void Update()
@@ -59,6 +63,16 @@ public class UIManager : SingletonMonoBehaviour<UIManager>
     }
 
     #region Public Methods
+    public void StopTimer()
+    {
+        StopCoroutine("startTimer");
+    }
+
+    public void StartTimer()
+    {
+        StartCoroutine("startTimer");
+    }
+
     public void MissionTextOn()
     {
         m_missionText.SetActive(true);
@@ -150,6 +164,44 @@ public class UIManager : SingletonMonoBehaviour<UIManager>
         }
 
         yield break;
+    }
+
+    IEnumerator startGame()
+    {
+        for(int i=3; i>0; i--)
+        {
+            m_startText.text = i.ToString();
+            yield return new WaitForSecondsRealtime(1f);
+        }
+
+        m_startText.text = "START";
+        yield return new WaitForSecondsRealtime(1f);
+
+        m_startText.enabled = false;
+        MissionTextOff();
+        GameManager.Instance.GameStart();
+        StartCoroutine("startTimer");
+    }
+
+    IEnumerator startTimer()
+    {
+        while (m_leftTime != 0)
+        {
+            int minute, second;
+
+            minute = m_leftTime / 60;
+            second = m_leftTime % 60;
+
+            m_timerText.text = string.Format("{0:00} : {1:00}", minute, second);
+            m_leftTime--;
+            yield return new WaitForSecondsRealtime(1f);
+        }
+
+        //타임오버
+        if (m_leftTime == 0)
+        {
+            GameManager.Instance.SetState(GameManager.eGameState.TimeOver);
+        }
     }
     #endregion
 }
