@@ -9,7 +9,6 @@ public class GameManager : SingletonMonoBehaviour<GameManager>
     {
         Normal,
         Pause,
-        TimeOver,
         PlayerDead,
         Success,
         Max
@@ -27,6 +26,9 @@ public class GameManager : SingletonMonoBehaviour<GameManager>
     Player_StateManager m_playScr;
     CameraRotate m_camScr;
     bool m_isStart;
+
+    int m_time;
+    int m_score;
     #endregion
 
     #region Unity Methods
@@ -39,11 +41,14 @@ public class GameManager : SingletonMonoBehaviour<GameManager>
 
         m_playScr = m_player.GetComponent<Player_StateManager>();
         m_camScr = m_camera.GetComponent<CameraRotate>();
+
+        m_time = 0;
+        m_score = 0;
     }
 
     void Update()
     {
-        if(Input.GetKeyDown(KeyCode.Escape) && m_isStart) //게임시작 카운트다운중에는 못누르게끔 막아둔것.
+        if(Input.GetKeyDown(KeyCode.Escape) && m_isStart && m_state != eGameState.PlayerDead) //게임시작 카운트다운중에는 못누르게끔 막아둔것.
         {
             if (Time.timeScale == 0)
             {
@@ -59,7 +64,6 @@ public class GameManager : SingletonMonoBehaviour<GameManager>
             }
         }
 
-        //시간초과
         //혹은 플레이어다이
     }
     #endregion
@@ -69,6 +73,12 @@ public class GameManager : SingletonMonoBehaviour<GameManager>
     {
         m_isStart = true;
         m_WaitBox.SetActive(false);
+        StartCoroutine("Timer");
+    }
+
+    public void AddScore(int score)
+    {
+        m_score += score;
     }
 
     public eGameState GetState()
@@ -90,35 +100,34 @@ public class GameManager : SingletonMonoBehaviour<GameManager>
             case eGameState.Normal:
                 Cursor.lockState = CursorLockMode.Locked;
                 Cursor.visible = false;
-                UIManager.Instance.StartTimer();
                 m_playScr.enabled = true;
                 m_camScr.enabled = true;
                 SoundManager.Instance.ReStartSound();
                 //UI매니저에서 메뉴닫아줘야함.
+                UIManager.Instance.CloseMenu();
                 break;
 
             case eGameState.Pause:
                 Cursor.lockState = CursorLockMode.None;
                 Cursor.visible = true;
-                UIManager.Instance.StopTimer();
                 m_playScr.enabled = false;
                 m_camScr.enabled = false;
                 SoundManager.Instance.StopSound();
                 //UI매니저에서 메뉴켜줘야함.
-                break;
-
-            case eGameState.TimeOver:
-                UIManager.Instance.PlayerDie();
-                StartCoroutine("FailView");
+                UIManager.Instance.OpenMenu();
                 break;
 
             case eGameState.PlayerDead:
-                UIManager.Instance.PlayerDie();
+                StopCoroutine("Timer");
+                UIManager.Instance.GameResult(false, m_time, m_score);
                 StartCoroutine("FailView");
                 m_player.gameObject.SetActive(false);
                 break;
 
             case eGameState.Success:
+                StopCoroutine("Timer");
+                UIManager.Instance.GameResult(true, m_time, m_score);
+                //석세스 처리.
                 break;
         }
     }
@@ -152,5 +161,17 @@ public class GameManager : SingletonMonoBehaviour<GameManager>
             }
         }
     }
+
+    IEnumerator Timer()
+    {
+        while(true)
+        {
+            yield return new WaitForSeconds(1f);
+
+            m_time++;
+        }
+    }
+
+    //페이드인 아웃 코루틴 만들어야함.
     #endregion
 }

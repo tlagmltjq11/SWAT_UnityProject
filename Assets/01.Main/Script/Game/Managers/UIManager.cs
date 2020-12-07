@@ -10,6 +10,16 @@ public class UIManager : SingletonMonoBehaviour<UIManager>
     #region Feild
     [SerializeField]
     GameObject m_UIPlay;
+    [SerializeField]
+    GameObject m_UIResult;
+    [SerializeField]
+    GameObject m_Menu;
+    [SerializeField]
+    GameObject m_missionPanel;
+    [SerializeField]
+    GameObject m_keyStrokeEXPPanel;
+    [SerializeField]
+    GameObject m_volumePanel;
     public GameObject m_crossHair;
     public TextMeshProUGUI m_bulletText;
     public TextMeshProUGUI m_remainATWText;
@@ -21,68 +31,94 @@ public class UIManager : SingletonMonoBehaviour<UIManager>
     public Image m_curATWImg;
     public GameObject m_progressObj;
     public Image m_progressBar;
-    public GameObject m_missionText;
-    public GameObject m_keyStrokeEXP;
-    public TextMeshProUGUI m_timerText;
     public TextMeshProUGUI m_startText;
-    [SerializeField]
-    GameObject m_UIDIe;
-    public int m_leftTime; // 스테이지 정보로 받아와야함.
+    public TextMeshProUGUI m_resultText;
+    public TextMeshProUGUI m_timerText;
+    public TextMeshProUGUI m_scoreText;
+    public TextMeshProUGUI m_missionText;
+    public Image m_alpha;
     #endregion
 
     protected override void OnStart()
     {
-        m_keyStrokeEXP.SetActive(false);
         m_progressObj.SetActive(false);
         StartCoroutine("startGame");
-        m_leftTime = 180;
     }
 
     void Update()
     {
-        if(Input.GetKeyDown(KeyCode.F1))
-        {
-            MissionTextOn();
-            CancelInvoke();
-        }
 
-        if(Input.GetKeyUp(KeyCode.F1))
-        {
-            MissionTextOff();
-        }
-
-        if (Input.GetKeyDown(KeyCode.F2))
-        {
-            m_keyStrokeEXP.SetActive(true);
-        }
-
-        if (Input.GetKeyUp(KeyCode.F2))
-        {
-            m_keyStrokeEXP.SetActive(false);
-        }
     }
 
     #region Public Methods
-    public void StopTimer()
+
+    #region Menu
+    public void OpenMenu()
     {
-        StopCoroutine("startTimer");
+        m_Menu.SetActive(true);
     }
 
-    public void StartTimer()
+    public void CloseMenu()
     {
-        StartCoroutine("startTimer");
+        m_Menu.SetActive(false);
+        m_missionPanel.SetActive(false);
+        m_keyStrokeEXPPanel.SetActive(false);
+        m_volumePanel.SetActive(false);
     }
 
-    public void MissionTextOn()
+    public void ClickCloseMenu()
     {
-        m_missionText.SetActive(true);
+        GameManager.Instance.SetState(GameManager.eGameState.Normal);
+        Time.timeScale = 1;
     }
 
-    public void MissionTextOff()
+    public void ClickMissionBtn()
     {
-        m_missionText.SetActive(false);
+        m_keyStrokeEXPPanel.SetActive(false);
+        m_volumePanel.SetActive(false);
+
+        if (m_missionPanel.activeSelf)
+        {
+            m_missionPanel.SetActive(false);
+        }
+        else
+        {
+            m_missionPanel.SetActive(true);
+        }
     }
 
+    public void ClickKeyStrokeEXPBtn()
+    {
+        m_missionPanel.SetActive(false);
+        m_volumePanel.SetActive(false);
+
+        if (m_keyStrokeEXPPanel.activeSelf)
+        {
+            m_keyStrokeEXPPanel.SetActive(false);
+        }
+        else
+        {
+            m_keyStrokeEXPPanel.SetActive(true);
+        }
+    }
+
+    public void ClickVolumeBtn()
+    {
+        m_missionPanel.SetActive(false);
+        m_keyStrokeEXPPanel.SetActive(false);
+
+        if (m_volumePanel.activeSelf)
+        {
+            m_volumePanel.SetActive(false);
+        }
+        else
+        {
+            m_volumePanel.SetActive(true);
+        }
+    }
+    #endregion
+
+    #region Play
     public void Update_Bullet(float currentBullets, float bulletsRemain)
     {
         m_bulletText.text = currentBullets + " / " + bulletsRemain;
@@ -121,7 +157,7 @@ public class UIManager : SingletonMonoBehaviour<UIManager>
     {
         m_progressObj.SetActive(OnOff);
 
-        if(!OnOff)
+        if (!OnOff)
         {
             m_progressBar.fillAmount = 0;
         }
@@ -145,12 +181,39 @@ public class UIManager : SingletonMonoBehaviour<UIManager>
     {
         StartCoroutine(bloodScreen(amt));
     }
+    #endregion
 
-    public void PlayerDie()
+    #region GameResult
+    public void GameResult(bool flag, int time, int score)
+    {
+        if (flag)
+        {
+            m_resultText.text = "Mission Success";
+        }
+        else
+        {
+            m_resultText.text = "Mission Failed";
+        }
+
+        int minute, second;
+        minute = time / 60;
+        second = time % 60;
+        m_timerText.text = string.Format("Time  : {0:00} : {1:00}", minute, second);
+
+        m_scoreText.text = "Score : " + score.ToString();
+
+        Invoke("GameResultUI", 3f);
+    }
+
+    public void GameResultUI()
     {
         m_UIPlay.SetActive(false);
-        m_UIDIe.SetActive(true);
+        m_UIResult.SetActive(true);
+        Cursor.lockState = CursorLockMode.None;
+        Cursor.visible = true;
     }
+    #endregion
+
     #endregion
 
     #region Coroutine
@@ -168,7 +231,7 @@ public class UIManager : SingletonMonoBehaviour<UIManager>
 
     IEnumerator startGame()
     {
-        for(int i=3; i>0; i--)
+        for (int i = 3; i > 0; i--)
         {
             m_startText.text = i.ToString();
             yield return new WaitForSecondsRealtime(1f);
@@ -178,30 +241,8 @@ public class UIManager : SingletonMonoBehaviour<UIManager>
         yield return new WaitForSecondsRealtime(1f);
 
         m_startText.enabled = false;
-        MissionTextOff();
+        m_missionText.enabled = false;
         GameManager.Instance.GameStart();
-        StartCoroutine("startTimer");
-    }
-
-    IEnumerator startTimer()
-    {
-        while (m_leftTime != 0)
-        {
-            int minute, second;
-
-            minute = m_leftTime / 60;
-            second = m_leftTime % 60;
-
-            m_timerText.text = string.Format("{0:00} : {1:00}", minute, second);
-            m_leftTime--;
-            yield return new WaitForSecondsRealtime(1f);
-        }
-
-        //타임오버
-        if (m_leftTime == 0)
-        {
-            GameManager.Instance.SetState(GameManager.eGameState.TimeOver);
-        }
     }
     #endregion
 }

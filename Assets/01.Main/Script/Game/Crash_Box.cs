@@ -17,6 +17,7 @@ public class Crash_Box : MonoBehaviour
         m_boxCollider.enabled = false;
         m_fracturedCrate.SetActive(true);
         m_crashAudioClip.Play();
+        GameManager.Instance.AddScore(10);
 
         Invoke("DestroySelf", 5f);
     }

@@ -8,6 +8,7 @@ public class Enemy_DIE : FSMSingleton<Enemy_DIE>, IFSMState<Enemy_StateManager>
     public void Enter(Enemy_StateManager e)
     {
         e.RagdollOnOff(false);
+        GameManager.Instance.AddScore(50);
     }
 
     //  상태 진행..
