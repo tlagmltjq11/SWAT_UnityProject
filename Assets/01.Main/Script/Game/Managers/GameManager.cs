@@ -25,10 +25,13 @@ public class GameManager : SingletonMonoBehaviour<GameManager>
     Vector3 FailViewPosition;
     Player_StateManager m_playScr;
     CameraRotate m_camScr;
+    WeaponSway m_sway;
     bool m_isStart;
 
     int m_time;
     int m_score;
+    public GameObject[] m_wave2Enemys;
+    public GameObject m_RescuePoint;
     #endregion
 
     #region Unity Methods
@@ -41,6 +44,7 @@ public class GameManager : SingletonMonoBehaviour<GameManager>
 
         m_playScr = m_player.GetComponent<Player_StateManager>();
         m_camScr = m_camera.GetComponent<CameraRotate>();
+        m_sway = m_player.GetComponentInChildren<WeaponSway>();
 
         m_time = 0;
         m_score = 0;
@@ -69,6 +73,17 @@ public class GameManager : SingletonMonoBehaviour<GameManager>
     #endregion
 
     #region Public Methods
+
+    public void HostageRescued()
+    {
+        foreach (GameObject obj in m_wave2Enemys)
+        {
+            obj.SetActive(true);
+        }
+
+        m_RescuePoint.SetActive(true);
+    }
+
     public void GameStart()
     {
         m_isStart = true;
@@ -102,8 +117,8 @@ public class GameManager : SingletonMonoBehaviour<GameManager>
                 Cursor.visible = false;
                 m_playScr.enabled = true;
                 m_camScr.enabled = true;
+                m_sway.enabled = true;
                 SoundManager.Instance.ReStartSound();
-                //UI매니저에서 메뉴닫아줘야함.
                 UIManager.Instance.CloseMenu();
                 break;
 
@@ -112,8 +127,8 @@ public class GameManager : SingletonMonoBehaviour<GameManager>
                 Cursor.visible = true;
                 m_playScr.enabled = false;
                 m_camScr.enabled = false;
+                m_sway.enabled = false;
                 SoundManager.Instance.StopSound();
-                //UI매니저에서 메뉴켜줘야함.
                 UIManager.Instance.OpenMenu();
                 break;
 
@@ -126,14 +141,24 @@ public class GameManager : SingletonMonoBehaviour<GameManager>
 
             case eGameState.Success:
                 StopCoroutine("Timer");
+                UIManager.Instance.CloseMenu();
                 UIManager.Instance.GameResult(true, m_time, m_score);
-                //석세스 처리.
+                Cursor.lockState = CursorLockMode.None;
+                Cursor.visible = true;
+                m_playScr.enabled = false;
+                m_camScr.enabled = false;
+                m_sway.enabled = false;
+                m_player.layer = LayerMask.NameToLayer("Default"); //적들이 공격하지 못하도록 레이어를 일시적으로 변경
                 break;
         }
     }
     #endregion
 
     #region Private Methods
+    public bool GetIsStart()
+    {
+        return m_isStart;
+    }
     #endregion
 
     #region Coroutine

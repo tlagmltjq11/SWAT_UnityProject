@@ -20,6 +20,10 @@ public class UIManager : SingletonMonoBehaviour<UIManager>
     GameObject m_keyStrokeEXPPanel;
     [SerializeField]
     GameObject m_volumePanel;
+    [SerializeField]
+    GameObject m_exitStagePanel;
+    [SerializeField]
+    GameObject m_gameOffPanel;
     public GameObject m_crossHair;
     public TextMeshProUGUI m_bulletText;
     public TextMeshProUGUI m_remainATWText;
@@ -64,6 +68,8 @@ public class UIManager : SingletonMonoBehaviour<UIManager>
         m_missionPanel.SetActive(false);
         m_keyStrokeEXPPanel.SetActive(false);
         m_volumePanel.SetActive(false);
+        m_exitStagePanel.SetActive(false);
+        m_gameOffPanel.SetActive(false);
     }
 
     public void ClickCloseMenu()
@@ -115,6 +121,44 @@ public class UIManager : SingletonMonoBehaviour<UIManager>
         {
             m_volumePanel.SetActive(true);
         }
+    }
+
+    public void ClickStageOffBtn()
+    {
+        if (m_exitStagePanel.activeSelf)
+        {
+            m_exitStagePanel.SetActive(false);
+        }
+        else
+        {
+            m_exitStagePanel.SetActive(true);
+        }
+    }
+
+    public void ClickGameOffBtn()
+    {
+        if (m_gameOffPanel.activeSelf)
+        {
+            m_gameOffPanel.SetActive(false);
+        }
+        else
+        {
+            m_gameOffPanel.SetActive(true);
+        }
+    }
+
+    public void ClickGameOffYes()
+    {
+        #if UNITY_EDITOR
+                UnityEditor.EditorApplication.isPlaying = false;
+        #else
+                Application.Quit() // 어플리케이션 종료
+        #endif
+    }
+
+    public void ClickExitStageYes()
+    {
+        //로비로 돌아가기
     }
     #endregion
 
@@ -202,7 +246,14 @@ public class UIManager : SingletonMonoBehaviour<UIManager>
 
         m_scoreText.text = "Score : " + score.ToString();
 
-        Invoke("GameResultUI", 3f);
+        if(flag)
+        {
+            Invoke("GameResultUI", 0.5f);
+        }
+        else
+        {
+            Invoke("GameResultUI", 3f);
+        }
     }
 
     public void GameResultUI()

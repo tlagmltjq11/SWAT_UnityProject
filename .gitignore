@@ -58,3 +58,7 @@ sysinfo.txt
 # Crashlytics generated file
 crashlytics-build.properties
 
+Assets/SlimUI.meta
+Assets/SlimUI/Data.meta
+Assets/SlimUI/Data/Theme Editor.asset
+Assets/SlimUI/Data/Theme Editor.asset.meta

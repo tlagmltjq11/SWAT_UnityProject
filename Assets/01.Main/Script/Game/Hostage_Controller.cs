@@ -63,13 +63,13 @@ public class Hostage_Controller : MonoBehaviour
                 break;
 
             case eState.RESCUE:
-                GameManager.Instance.AddScore(500);
-
                 m_anim.SetTrigger("ISRESCUE");
 
                 m_info = m_anim.GetCurrentAnimatorStateInfo(0);
                 if (m_info.IsName("Hostage_IDLE"))
                 {
+                    GameManager.Instance.AddScore(500);
+                    GameManager.Instance.HostageRescued();
                     m_state = eState.IDLE;
                 }
                 break;

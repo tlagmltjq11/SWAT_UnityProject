@@ -87,7 +87,7 @@ public class Player_StateManager : FSM<Player_StateManager>
     { 
         FSMUpdate();
         #region Weapon Handle
-        if (m_currentWeapon != null || m_currentATW != null)
+        if (m_currentWeapon != null && GameManager.Instance.GetIsStart())
         {
             // 총기 발사
             if(m_WPType == eWeaponType.AR)
@@ -121,7 +121,7 @@ public class Player_StateManager : FSM<Player_StateManager>
             }
 
             //투척물 투척하기
-            if (Input.GetKeyDown(KeyCode.G) && !m_isRunning && !m_currentWeapon.m_isReloading && !m_currentWeapon.m_isAiming && !m_currentWeapon.m_isDrawing && (m_isLeanE == false && m_isLeanQ == false) && !m_currentWeapon.m_isFiring)
+            if (Input.GetKeyDown(KeyCode.G) && !m_isRunning && m_currentATW != null && !m_currentWeapon.m_isReloading && !m_currentWeapon.m_isAiming && !m_currentWeapon.m_isDrawing && (m_isLeanE == false && m_isLeanQ == false) && !m_currentWeapon.m_isFiring)
             {
                 if(m_currentATW.m_remainNum > 0 && m_currentATW.m_remainNum <= 2)
                 {
