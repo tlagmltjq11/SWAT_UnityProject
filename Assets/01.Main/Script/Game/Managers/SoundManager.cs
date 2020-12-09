@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Audio;
-
+using UnityEngine.UI;
 public class SoundManager : SingletonMonoBehaviour<SoundManager>
 {
     #region Field
@@ -45,6 +45,7 @@ public class SoundManager : SingletonMonoBehaviour<SoundManager>
         UNTIE_HOSTAGE,
         FLASH_ON,
         FLASH_OFF,
+        BUTTON,
         MAX
     }
 
@@ -62,11 +63,42 @@ public class SoundManager : SingletonMonoBehaviour<SoundManager>
     AudioSource m_helicopter;
     [SerializeField]
     AudioSource m_policeCar;
+    [SerializeField]
+    AudioMixer m_audioMixer;
+    [SerializeField]
+    Slider m_effectAudioSlider;
+    [SerializeField]
+    Slider m_bgmAudioSlider;
     List<AudioSource> m_pausedAudios = new List<AudioSource>();
     public float m_totalVolume = 1f;
+
     #endregion
 
     #region Public Methods
+    public void EffectAudioControl(float volume)
+    {
+        if(volume == -40f)
+        {
+            m_audioMixer.SetFloat("SFXVolume", -80); //Mute 해주기위함
+        }
+        else
+        {
+            m_audioMixer.SetFloat("SFXVolume", volume);
+        }
+    }
+
+    public void BGMAudioControl(float volume)
+    {
+        if (volume == -40f)
+        {
+            m_audioMixer.SetFloat("BGMVolume", -80); //Mute 해주기위함
+        }
+        else
+        {
+            m_audioMixer.SetFloat("BGMVolume", volume);
+        }
+    }
+
     public void BGMPlay()
     {
         m_BGMSource.Play();

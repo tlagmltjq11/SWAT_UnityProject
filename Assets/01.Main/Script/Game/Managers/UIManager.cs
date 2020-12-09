@@ -74,12 +74,14 @@ public class UIManager : SingletonMonoBehaviour<UIManager>
 
     public void ClickCloseMenu()
     {
+        SoundManager.Instance.Play2DSound(SoundManager.eAudioClip.BUTTON, 1f);
         GameManager.Instance.SetState(GameManager.eGameState.Normal);
         Time.timeScale = 1;
     }
 
     public void ClickMissionBtn()
     {
+        SoundManager.Instance.Play2DSound(SoundManager.eAudioClip.BUTTON, 1f);
         m_keyStrokeEXPPanel.SetActive(false);
         m_volumePanel.SetActive(false);
 
@@ -95,6 +97,7 @@ public class UIManager : SingletonMonoBehaviour<UIManager>
 
     public void ClickKeyStrokeEXPBtn()
     {
+        SoundManager.Instance.Play2DSound(SoundManager.eAudioClip.BUTTON, 1f);
         m_missionPanel.SetActive(false);
         m_volumePanel.SetActive(false);
 
@@ -110,6 +113,7 @@ public class UIManager : SingletonMonoBehaviour<UIManager>
 
     public void ClickVolumeBtn()
     {
+        SoundManager.Instance.Play2DSound(SoundManager.eAudioClip.BUTTON, 1f);
         m_missionPanel.SetActive(false);
         m_keyStrokeEXPPanel.SetActive(false);
 
@@ -125,6 +129,7 @@ public class UIManager : SingletonMonoBehaviour<UIManager>
 
     public void ClickStageOffBtn()
     {
+        SoundManager.Instance.Play2DSound(SoundManager.eAudioClip.BUTTON, 1f);
         if (m_exitStagePanel.activeSelf)
         {
             m_exitStagePanel.SetActive(false);
@@ -137,6 +142,7 @@ public class UIManager : SingletonMonoBehaviour<UIManager>
 
     public void ClickGameOffBtn()
     {
+        SoundManager.Instance.Play2DSound(SoundManager.eAudioClip.BUTTON, 1f);
         if (m_gameOffPanel.activeSelf)
         {
             m_gameOffPanel.SetActive(false);
@@ -149,8 +155,10 @@ public class UIManager : SingletonMonoBehaviour<UIManager>
 
     public void ClickGameOffYes()
     {
+        SoundManager.Instance.Play2DSound(SoundManager.eAudioClip.BUTTON, 1f);
+
         #if UNITY_EDITOR
-                UnityEditor.EditorApplication.isPlaying = false;
+        UnityEditor.EditorApplication.isPlaying = false;
         #else
                 Application.Quit() // 어플리케이션 종료
         #endif
@@ -158,6 +166,7 @@ public class UIManager : SingletonMonoBehaviour<UIManager>
 
     public void ClickExitStageYes()
     {
+        SoundManager.Instance.Play2DSound(SoundManager.eAudioClip.BUTTON, 1f);
         //로비로 돌아가기
     }
     #endregion

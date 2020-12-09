@@ -56,19 +56,15 @@ public class GameManager : SingletonMonoBehaviour<GameManager>
         {
             if (Time.timeScale == 0)
             {
-                //SoundManager.Instance.PlayBGM();
                 SetState(eGameState.Normal);
                 Time.timeScale = 1;
             }
             else
             {
-                //SoundManager.Instance.PauseBGM();
                 SetState(eGameState.Pause);
                 Time.timeScale = 0;
             }
         }
-
-        //혹은 플레이어다이
     }
     #endregion
 
