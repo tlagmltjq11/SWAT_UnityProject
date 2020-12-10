@@ -2,68 +2,52 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
-using UnityEditor;
-public class LoadSceneManager : DonDestroy<LoadSceneManager>
+using UnityEngine.UI;
+
+
+public class LoadSceneManager : MonoBehaviour
 {
-    public enum eSceneState
+    static string m_nextScene;
+
+    [SerializeField]
+    Image m_progressBar;
+
+    public static void LoadScene(string sceneName)
     {
-        None = -1,
-        TitleScene,
-        Stage1,
-        Stage2,
-        Stage3
+        m_nextScene = sceneName;
+        SceneManager.LoadScene("Loading");
     }
 
-    eSceneState m_state = eSceneState.TitleScene;
-    eSceneState m_loadState = eSceneState.None;
-    string m_progressLabel;
-    AsyncOperation m_loadSceneState;
-    SpriteRenderer m_loadingBgSpr;
-
-    public void SetState(eSceneState state)
+    private void Start()
     {
-        m_state = state;
+        StartCoroutine(LoadSceneProgress());
     }
 
-    public eSceneState GetState()
+    IEnumerator LoadSceneProgress()
     {
-        return m_state;
-    }
+        AsyncOperation op = SceneManager.LoadSceneAsync(m_nextScene);
+        op.allowSceneActivation = false;
 
-    public void LoadSceneAsync(eSceneState state)
-    {
-        //load를 하고 있다면
-        if (m_loadState != eSceneState.None)
+        float timer = 0f;
+
+        while(!op.isDone)
         {
-            return;
-        }
+            yield return null;
 
-        m_loadState = state;
-        ///m_loadingBgSpr.enabled = true;
-        m_loadSceneState = SceneManager.LoadSceneAsync(state.ToString());
-    }
-    protected override void OnStart()
-    {
-        
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        if (m_loadSceneState != null && m_loadState != eSceneState.None)
-        {
-            if (m_loadSceneState.isDone)
+            if (op.progress < 0.9f)
             {
-                //m_loadingBgSpr.enabled = false;
-                m_loadSceneState = null;
-
-                m_state = m_loadState;
-                m_loadState = eSceneState.None;
-                m_progressLabel = "100";
+                m_progressBar.fillAmount = op.progress;
             }
             else
             {
-                m_progressLabel = ((int)(m_loadSceneState.progress * 100)).ToString();
+                timer += Time.unscaledDeltaTime;
+                m_progressBar.fillAmount = Mathf.Lerp(0.9f, 1f, timer);
+
+                if(m_progressBar.fillAmount >= 1f)
+                {
+                    op.allowSceneActivation = true;
+                    yield break;
+                }
             }
         }
     }

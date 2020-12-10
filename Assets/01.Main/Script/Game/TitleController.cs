@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Audio;
 
 public class TitleController : MonoBehaviour
 {
@@ -17,7 +18,6 @@ public class TitleController : MonoBehaviour
     GameObject m_keyStrokePanel;
     [SerializeField]
     GameObject m_volumePanel;
-
     #endregion
 
     #region Unity Methods
@@ -98,7 +98,7 @@ public class TitleController : MonoBehaviour
     {
         m_btnAudioSource.Play();
 
-        LoadSceneManager.Instance.LoadSceneAsync(LoadSceneManager.eSceneState.Stage1);
+        LoadSceneManager.LoadScene("Stage1");
     }
 
     public void ClickExit()
@@ -110,6 +110,16 @@ public class TitleController : MonoBehaviour
         #else
                         Application.Quit() // 어플리케이션 종료
         #endif
+    }
+
+    public void BGMAudioControl(float volume)
+    {
+        m_bgmAudioSource.volume = volume;
+    }
+
+    public void SfxAudioControl(float volume)
+    {
+        m_btnAudioSource.volume = volume;
     }
     #endregion
 

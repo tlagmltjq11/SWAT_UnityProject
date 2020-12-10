@@ -48,6 +48,8 @@ public class GameManager : SingletonMonoBehaviour<GameManager>
 
         m_time = 0;
         m_score = 0;
+
+        Time.timeScale = 1;
     }
 
     void Update()

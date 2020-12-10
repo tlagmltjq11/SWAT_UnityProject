@@ -168,6 +168,7 @@ public class UIManager : SingletonMonoBehaviour<UIManager>
     {
         SoundManager.Instance.Play2DSound(SoundManager.eAudioClip.BUTTON, 1f);
         //로비로 돌아가기
+        LoadSceneManager.LoadScene("TitleScene");
     }
     #endregion
 
