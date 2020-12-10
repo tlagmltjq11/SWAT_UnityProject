@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Audio;
+using UnityEngine.UI;
+using TMPro;
 
 public class TitleController : MonoBehaviour
 {
@@ -10,6 +12,7 @@ public class TitleController : MonoBehaviour
     public AudioClip m_BGM;
     public AudioSource m_btnAudioSource;
     public AudioSource m_bgmAudioSource;
+    public AudioMixer m_audioMixer;
     [SerializeField]
     GameObject m_startPanel;
     [SerializeField]
@@ -18,6 +21,14 @@ public class TitleController : MonoBehaviour
     GameObject m_keyStrokePanel;
     [SerializeField]
     GameObject m_volumePanel;
+    [SerializeField]
+    Slider m_BGMSlider;
+    [SerializeField]
+    Slider m_SFXSlider;
+    [SerializeField]
+    TextMeshProUGUI[] m_bestScore;
+    [SerializeField]
+    TextMeshProUGUI[] m_bestTime;
     #endregion
 
     #region Unity Methods
@@ -27,6 +38,20 @@ public class TitleController : MonoBehaviour
         m_btnAudioSource.clip = m_button;
         m_bgmAudioSource.clip = m_BGM;
         m_bgmAudioSource.loop = true;
+
+        BGMAudioControl(PlayerPrefs.GetFloat("BGMVolume"));
+        SfxAudioControl(PlayerPrefs.GetFloat("SFXVolume"));
+
+        m_BGMSlider.value = PlayerPrefs.GetFloat("BGMVolume");
+        m_SFXSlider.value = PlayerPrefs.GetFloat("SFXVolume");
+
+        for(int i=0; i<m_bestScore.Length; i++)
+        {
+            m_bestScore[i].text = "Best Score : " + PlayerDataManager.Instance.GetBestScore((PlayerData.eStage)i).ToString();
+            m_bestTime[i].text = "Best Time  : " + PlayerDataManager.Instance.GetBestTime((PlayerData.eStage)i).ToString();
+            Debug.Log("!11");
+        }
+
         m_bgmAudioSource.Play();
     }
     #endregion
@@ -114,12 +139,33 @@ public class TitleController : MonoBehaviour
 
     public void BGMAudioControl(float volume)
     {
-        m_bgmAudioSource.volume = volume;
+
+        if (volume == -40f)
+        {
+            m_audioMixer.SetFloat("BGMVolume", -80); //Mute 해주기위함
+        }
+        else
+        {
+            m_audioMixer.SetFloat("BGMVolume", volume);
+        }
+
+        PlayerPrefs.SetFloat("BGMVolume", volume);
+        PlayerPrefs.Save();
     }
 
     public void SfxAudioControl(float volume)
     {
-        m_btnAudioSource.volume = volume;
+        if (volume == -40f)
+        {
+            m_audioMixer.SetFloat("SFXVolume", -80); //Mute 해주기위함
+        }
+        else
+        {
+            m_audioMixer.SetFloat("SFXVolume", volume);
+        }
+
+        PlayerPrefs.SetFloat("SFXVolume", volume);
+        PlayerPrefs.Save();
     }
     #endregion
 

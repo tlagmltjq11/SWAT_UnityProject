@@ -4,7 +4,6 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
-
 public class LoadSceneManager : MonoBehaviour
 {
     static string m_nextScene;

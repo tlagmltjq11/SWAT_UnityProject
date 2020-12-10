@@ -74,6 +74,12 @@ public class SoundManager : SingletonMonoBehaviour<SoundManager>
 
     #endregion
 
+    private void Start()
+    {
+        BGMAudioControl(PlayerPrefs.GetFloat("BGMVolume"));
+        EffectAudioControl(PlayerPrefs.GetFloat("SFXVolume"));
+    }
+
     #region Public Methods
     public void EffectAudioControl(float volume)
     {
@@ -85,6 +91,9 @@ public class SoundManager : SingletonMonoBehaviour<SoundManager>
         {
             m_audioMixer.SetFloat("SFXVolume", volume);
         }
+
+        PlayerPrefs.SetFloat("SFXVolume", volume);
+        PlayerPrefs.Save();
     }
 
     public void BGMAudioControl(float volume)
@@ -97,6 +106,9 @@ public class SoundManager : SingletonMonoBehaviour<SoundManager>
         {
             m_audioMixer.SetFloat("BGMVolume", volume);
         }
+
+        PlayerPrefs.SetFloat("BGMVolume", volume);
+        PlayerPrefs.Save();
     }
 
     public void BGMPlay()

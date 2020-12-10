@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.U2D;
 using TMPro;
+using UnityEngine.SceneManagement;
 
 public class UIManager : SingletonMonoBehaviour<UIManager>
 {
@@ -41,17 +42,26 @@ public class UIManager : SingletonMonoBehaviour<UIManager>
     public TextMeshProUGUI m_scoreText;
     public TextMeshProUGUI m_missionText;
     public Image m_alpha;
+    [SerializeField]
+    Slider m_BGMSlider;
+    [SerializeField]
+    Slider m_SFXSlider;
+    [SerializeField]
+    TextMeshProUGUI m_bestTimeText;
+    [SerializeField]
+    TextMeshProUGUI m_bestScoreText;
     #endregion
 
     protected override void OnStart()
     {
         m_progressObj.SetActive(false);
         StartCoroutine("startGame");
-    }
 
-    void Update()
-    {
+        m_BGMSlider.value = PlayerPrefs.GetFloat("BGMVolume");
+        m_SFXSlider.value = PlayerPrefs.GetFloat("SFXVolume");
 
+        m_bestTimeText.gameObject.SetActive(false);
+        m_bestScoreText.gameObject.SetActive(false);
     }
 
     #region Public Methods
@@ -125,6 +135,12 @@ public class UIManager : SingletonMonoBehaviour<UIManager>
         {
             m_volumePanel.SetActive(true);
         }
+    }
+
+    public void ClickRePlayStage()
+    {
+        SoundManager.Instance.Play2DSound(SoundManager.eAudioClip.BUTTON, 1f);
+        LoadSceneManager.LoadScene(SceneManager.GetActiveScene().name);
     }
 
     public void ClickStageOffBtn()
@@ -249,10 +265,53 @@ public class UIManager : SingletonMonoBehaviour<UIManager>
             m_resultText.text = "Mission Failed";
         }
 
+        /*
+        PlayerData.eStage temp;
+
+        for (temp = PlayerData.eStage.stage1; temp < PlayerData.eStage.Max; temp++)
+        {
+            if (temp.ToString().Equals(SceneManager.GetActiveScene().name))
+            {
+                break;
+            }
+        }*/
+
+
+        PlayerData.eStage temp = PlayerData.eStage.stage1;
+        if (SceneManager.GetActiveScene().name == "Stage1")
+        {
+            temp = PlayerData.eStage.stage1;
+        }
+
+
+        int bestTime = PlayerDataManager.Instance.GetBestTime(temp);
+        int bestScore = PlayerDataManager.Instance.GetBestScore(temp);
+
+
+        if (time >= bestTime)
+        {
+            m_bestTimeText.gameObject.SetActive(false);
+        }
+        else if(time < bestTime && flag) //시간이 더 적게걸렸을때 미션도 성공해야 타임은 갱신.
+        {
+            m_bestTimeText.gameObject.SetActive(true);
+            PlayerDataManager.Instance.SetBestTime(temp, time);
+        }
+
         int minute, second;
         minute = time / 60;
         second = time % 60;
         m_timerText.text = string.Format("Time  : {0:00} : {1:00}", minute, second);
+
+        if(score <= bestScore)
+        {
+            m_bestScoreText.gameObject.SetActive(false);
+        }
+        else
+        {
+            m_bestScoreText.gameObject.SetActive(true);
+            PlayerDataManager.Instance.SetBestScore(temp, score);
+        }
 
         m_scoreText.text = "Score : " + score.ToString();
 
