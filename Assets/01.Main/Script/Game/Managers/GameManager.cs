@@ -179,7 +179,6 @@ public class GameManager : SingletonMonoBehaviour<GameManager>
 
             if(m_failViewCam.transform.position == FailViewPosition)
             {
-                Debug.Log("break");
                 yield break;
             }
         }

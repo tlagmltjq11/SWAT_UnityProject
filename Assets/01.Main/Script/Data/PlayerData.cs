@@ -6,9 +6,9 @@ public class PlayerData
 {
     public enum eStage
     {
-        stage1,
-        stage2,
-        stage3,
+        Stage1 = 1,
+        Stage2,
+        Stage3,
         Max
     }
 

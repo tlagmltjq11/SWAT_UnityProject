@@ -25,6 +25,16 @@ public class UIManager : SingletonMonoBehaviour<UIManager>
     GameObject m_exitStagePanel;
     [SerializeField]
     GameObject m_gameOffPanel;
+    [SerializeField]
+    Slider m_BGMSlider;
+    [SerializeField]
+    Slider m_SFXSlider;
+    [SerializeField]
+    TextMeshProUGUI m_bestTimeText;
+    [SerializeField]
+    TextMeshProUGUI m_bestScoreText;
+    [SerializeField]
+    Image m_fadeInOut;
     public GameObject m_crossHair;
     public TextMeshProUGUI m_bulletText;
     public TextMeshProUGUI m_remainATWText;
@@ -41,21 +51,13 @@ public class UIManager : SingletonMonoBehaviour<UIManager>
     public TextMeshProUGUI m_timerText;
     public TextMeshProUGUI m_scoreText;
     public TextMeshProUGUI m_missionText;
-    public Image m_alpha;
-    [SerializeField]
-    Slider m_BGMSlider;
-    [SerializeField]
-    Slider m_SFXSlider;
-    [SerializeField]
-    TextMeshProUGUI m_bestTimeText;
-    [SerializeField]
-    TextMeshProUGUI m_bestScoreText;
     #endregion
 
     protected override void OnStart()
     {
         m_progressObj.SetActive(false);
-        StartCoroutine("startGame");
+
+        StartCoroutine("FadeIn");
 
         m_BGMSlider.value = PlayerPrefs.GetFloat("BGMVolume");
         m_SFXSlider.value = PlayerPrefs.GetFloat("SFXVolume");
@@ -137,12 +139,6 @@ public class UIManager : SingletonMonoBehaviour<UIManager>
         }
     }
 
-    public void ClickRePlayStage()
-    {
-        SoundManager.Instance.Play2DSound(SoundManager.eAudioClip.BUTTON, 1f);
-        LoadSceneManager.LoadScene(SceneManager.GetActiveScene().name);
-    }
-
     public void ClickStageOffBtn()
     {
         SoundManager.Instance.Play2DSound(SoundManager.eAudioClip.BUTTON, 1f);
@@ -176,15 +172,20 @@ public class UIManager : SingletonMonoBehaviour<UIManager>
         #if UNITY_EDITOR
         UnityEditor.EditorApplication.isPlaying = false;
         #else
-                Application.Quit() // 어플리케이션 종료
+                Application.Quit(); // 어플리케이션 종료
         #endif
     }
 
     public void ClickExitStageYes()
     {
         SoundManager.Instance.Play2DSound(SoundManager.eAudioClip.BUTTON, 1f);
-        //로비로 돌아가기
-        LoadSceneManager.LoadScene("TitleScene");
+        StartCoroutine(FadeOut("TitleScene"));
+    }
+
+    public void ClickRePlayStage()
+    {
+        SoundManager.Instance.Play2DSound(SoundManager.eAudioClip.BUTTON, 1f);
+        StartCoroutine(FadeOut(SceneManager.GetActiveScene().name));
     }
     #endregion
 
@@ -274,15 +275,16 @@ public class UIManager : SingletonMonoBehaviour<UIManager>
             {
                 break;
             }
-        }*/
+        }
 
 
         PlayerData.eStage temp = PlayerData.eStage.stage1;
         if (SceneManager.GetActiveScene().name == "Stage1")
         {
             temp = PlayerData.eStage.stage1;
-        }
+        }*/
 
+        PlayerData.eStage temp = (PlayerData.eStage)int.Parse(SceneManager.GetActiveScene().name);
 
         int bestTime = PlayerDataManager.Instance.GetBestTime(temp);
         int bestScore = PlayerDataManager.Instance.GetBestScore(temp);
@@ -347,6 +349,56 @@ public class UIManager : SingletonMonoBehaviour<UIManager>
         }
 
         yield break;
+    }
+
+    IEnumerator FadeIn()
+    {
+        float FadeTime = 2f;
+        float time;
+
+        Color fadecolor = m_fadeInOut.color;
+
+        time = 0f;
+
+        while (fadecolor.a > 0f)
+        {
+            time += Time.deltaTime / FadeTime;
+
+            fadecolor.a = Mathf.Lerp(1f, 0f, time);
+
+            m_fadeInOut.color = fadecolor;
+
+            yield return null;
+        }
+
+        m_missionText.gameObject.SetActive(true);
+        m_startText.gameObject.SetActive(true);
+        StartCoroutine("startGame");
+    }
+
+    IEnumerator FadeOut(string sceneName)
+    {
+        Time.timeScale = 1;
+
+        float FadeTime = 2f;
+        float time;
+
+        Color fadecolor = m_fadeInOut.color;
+
+        time = 0f;
+
+        while (fadecolor.a < 1f)
+        {
+            time += Time.deltaTime / FadeTime;
+
+            fadecolor.a = Mathf.Lerp(0f, 1f, time);
+
+            m_fadeInOut.color = fadecolor;
+
+            yield return null;
+        }
+
+        LoadSceneManager.LoadScene(sceneName);
     }
 
     IEnumerator startGame()

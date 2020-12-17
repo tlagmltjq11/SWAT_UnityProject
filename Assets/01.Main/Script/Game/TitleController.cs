@@ -49,7 +49,6 @@ public class TitleController : MonoBehaviour
         {
             m_bestScore[i].text = "Best Score : " + PlayerDataManager.Instance.GetBestScore((PlayerData.eStage)i).ToString();
             m_bestTime[i].text = "Best Time  : " + PlayerDataManager.Instance.GetBestTime((PlayerData.eStage)i).ToString();
-            Debug.Log("!11");
         }
 
         m_bgmAudioSource.Play();
@@ -123,7 +122,7 @@ public class TitleController : MonoBehaviour
     {
         m_btnAudioSource.Play();
 
-        LoadSceneManager.LoadScene("Stage1");
+        LoadSceneManager.LoadScene("1"); //stage1 의미
     }
 
     public void ClickExit()
@@ -133,7 +132,7 @@ public class TitleController : MonoBehaviour
         #if UNITY_EDITOR
         UnityEditor.EditorApplication.isPlaying = false;
         #else
-                        Application.Quit() // 어플리케이션 종료
+                        Application.Quit(); // 어플리케이션 종료
         #endif
     }
 

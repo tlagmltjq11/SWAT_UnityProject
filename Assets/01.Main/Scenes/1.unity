@@ -30247,7 +30247,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &671286963
 RectTransform:
   m_ObjectHideFlags: 0
@@ -31611,7 +31611,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &720422501
 RectTransform:
   m_ObjectHideFlags: 0
@@ -33612,6 +33612,8 @@ GameObject:
   - component: {fileID: 778315006}
   - component: {fileID: 778315004}
   - component: {fileID: 778315003}
+  - component: {fileID: 778315007}
+  - component: {fileID: 778315005}
   m_Layer: 8
   m_Name: Player
   m_TagString: Player
@@ -33696,6 +33698,25 @@ CharacterController:
   m_SkinWidth: 0.08
   m_MinMoveDistance: 0.001
   m_Center: {x: 0, y: -0.4, z: 0}
+--- !u!95 &778315005
+Animator:
+  serializedVersion: 3
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 778315002}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 0}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorControllerStateOnDisable: 0
 --- !u!4 &778315006
 Transform:
   m_ObjectHideFlags: 0
@@ -33712,6 +33733,25 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 9
   m_LocalEulerAnglesHint: {x: 0, y: 180, z: 0}
+--- !u!320 &778315007
+PlayableDirector:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 778315002}
+  m_Enabled: 1
+  serializedVersion: 3
+  m_PlayableAsset: {fileID: 11400000, guid: 99eaaa1dedefcdf45857000abaf4bb20, type: 2}
+  m_InitialState: 1
+  m_WrapMode: 2
+  m_DirectorUpdateMode: 1
+  m_InitialTime: 0
+  m_SceneBindings:
+  - key: {fileID: 7842289002159551863, guid: 99eaaa1dedefcdf45857000abaf4bb20, type: 2}
+    value: {fileID: 778315005}
+  m_ExposedReferences:
+    m_References: []
 --- !u!1 &781300152
 GameObject:
   m_ObjectHideFlags: 0
@@ -65346,6 +65386,11 @@ MonoBehaviour:
   m_volumePanel: {fileID: 631635422}
   m_exitStagePanel: {fileID: 1413591098}
   m_gameOffPanel: {fileID: 1570423365}
+  m_BGMSlider: {fileID: 963638410}
+  m_SFXSlider: {fileID: 1504550261}
+  m_bestTimeText: {fileID: 1524765710}
+  m_bestScoreText: {fileID: 743013790}
+  m_fadeInOut: {fileID: 1373914096}
   m_crossHair: {fileID: 2125122971}
   m_bulletText: {fileID: 1996832617}
   m_remainATWText: {fileID: 1845958012}
@@ -65362,11 +65407,6 @@ MonoBehaviour:
   m_timerText: {fileID: 665625965}
   m_scoreText: {fileID: 79997488}
   m_missionText: {fileID: 720422502}
-  m_alpha: {fileID: 1373914096}
-  m_BGMSlider: {fileID: 963638410}
-  m_SFXSlider: {fileID: 1504550261}
-  m_bestTimeText: {fileID: 1524765710}
-  m_bestScoreText: {fileID: 743013790}
 --- !u!1 &1977066913
 GameObject:
   m_ObjectHideFlags: 0
