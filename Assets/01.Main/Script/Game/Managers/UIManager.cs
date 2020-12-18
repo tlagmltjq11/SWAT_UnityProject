@@ -5,6 +5,7 @@ using UnityEngine.UI;
 using UnityEngine.U2D;
 using TMPro;
 using UnityEngine.SceneManagement;
+using UnityEngine.Playables;
 
 public class UIManager : SingletonMonoBehaviour<UIManager>
 {
@@ -35,6 +36,7 @@ public class UIManager : SingletonMonoBehaviour<UIManager>
     TextMeshProUGUI m_bestScoreText;
     [SerializeField]
     Image m_fadeInOut;
+
     public GameObject m_crossHair;
     public TextMeshProUGUI m_bulletText;
     public TextMeshProUGUI m_remainATWText;
@@ -51,13 +53,20 @@ public class UIManager : SingletonMonoBehaviour<UIManager>
     public TextMeshProUGUI m_timerText;
     public TextMeshProUGUI m_scoreText;
     public TextMeshProUGUI m_missionText;
+
+    public GameObject m_progressObj_Tl;
+    public Image m_progressBar_Tl;
+    public PlayableDirector m_introTl;
+    public GameObject m_camTl;
+
+    Coroutine m_startCrt = null;
     #endregion
 
     protected override void OnStart()
     {
         m_progressObj.SetActive(false);
 
-        StartCoroutine("FadeIn");
+        StartCoroutine("FadeIn"); //페이드인
 
         m_BGMSlider.value = PlayerPrefs.GetFloat("BGMVolume");
         m_SFXSlider.value = PlayerPrefs.GetFloat("SFXVolume");
@@ -66,9 +75,61 @@ public class UIManager : SingletonMonoBehaviour<UIManager>
         m_bestScoreText.gameObject.SetActive(false);
     }
 
+    private void Update()
+    {
+        if(m_introTl.state == PlayState.Playing)
+        {
+            if (Input.GetKey(KeyCode.Escape))
+            {
+                if (UIManager.Instance.ProgressBarFill_Tl(0.2f))
+                {
+                    GameManager.Instance.ReleasePlayer();
+                    SoundManager.Instance.Cop_SoundStart();
+
+                    m_introTl.Stop();
+                    m_camTl.SetActive(false);
+                    m_progressObj_Tl.SetActive(false);
+                    
+                    m_UIPlay.SetActive(true);
+
+                    m_startCrt = StartCoroutine("startGame");
+                }
+            }
+            else
+            {
+                UIManager.Instance.ProgressBarFill_Tl(-0.2f);
+            }
+        }
+
+        //인트로 캠이 비활성화된 경우는 컷신이 끝났을 경우임.
+        //고로 건너뛰기를 했거나 컷신이 끝난것으로 판단하는데, 이때 건너뛰기를 통해 이미 게임이 시작됐는지를 코루틴변수로 판단함.
+        //고로 이 경우는 정상적으로 건너뛰기없이 컷신이끝난 후 게임을 시작시키는 경우.
+        if(m_camTl.activeSelf == false && m_startCrt == null)
+        {
+            GameManager.Instance.ReleasePlayer();
+            SoundManager.Instance.Cop_SoundStart();
+
+            m_UIPlay.SetActive(true);
+            m_progressObj_Tl.SetActive(false);
+
+            m_startCrt = StartCoroutine("startGame");
+        }
+    }
+
     #region Public Methods
 
     #region Menu
+    public void Intro()
+    {
+        GameManager.Instance.HoldPlayer();
+
+        //-----컷신 시작-----//
+        m_introTl.gameObject.SetActive(true);
+        m_introTl.Play();
+        m_progressObj_Tl.SetActive(true);
+        //-------------------//
+    }
+
     public void OpenMenu()
     {
         m_Menu.SetActive(true);
@@ -248,6 +309,20 @@ public class UIManager : SingletonMonoBehaviour<UIManager>
         }
     }
 
+    public bool ProgressBarFill_Tl(float amt)
+    {
+        m_progressBar_Tl.fillAmount = Mathf.Lerp(m_progressBar_Tl.fillAmount, m_progressBar_Tl.fillAmount + amt, Time.deltaTime * 2f);
+
+        if (m_progressObj_Tl.activeSelf && m_progressBar_Tl.fillAmount >= 1)
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+
     public void BloodScreenOn(float amt)
     {
         StartCoroutine(bloodScreen(amt));
@@ -353,7 +428,7 @@ public class UIManager : SingletonMonoBehaviour<UIManager>
 
     IEnumerator FadeIn()
     {
-        float FadeTime = 2f;
+        float FadeTime = 1f;
         float time;
 
         Color fadecolor = m_fadeInOut.color;
@@ -373,7 +448,8 @@ public class UIManager : SingletonMonoBehaviour<UIManager>
 
         m_missionText.gameObject.SetActive(true);
         m_startText.gameObject.SetActive(true);
-        StartCoroutine("startGame");
+
+        Intro();
     }
 
     IEnumerator FadeOut(string sceneName)

@@ -7103,7 +7103,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_button: {fileID: 8300000, guid: 45dd760e7266b434688409fe32085836, type: 3}
-  m_BGM: {fileID: 8300000, guid: 5ae5b4f05aaedda4bb073e24ee777fb3, type: 3}
+  m_BGM: {fileID: 8300000, guid: fa9fb707d2a04034a8e32786e5494693, type: 3}
   m_btnAudioSource: {fileID: 1596641844}
   m_bgmAudioSource: {fileID: 1596641843}
   m_audioMixer: {fileID: 24100000, guid: b4755cf01f331084682254fd0979c6c1, type: 2}

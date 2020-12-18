@@ -178,9 +178,17 @@ public class SoundManager : SingletonMonoBehaviour<SoundManager>
         }
     }
 
+    public void Cop_SoundStart()
+    {
+        m_helicopter.Play();
+        m_policeCar.Play();
+    }
+
     public void StopSound()
     {
-        if(m_2DSoundSource.isPlaying)
+        BGMPause();
+
+        if (m_2DSoundSource.isPlaying)
         {
             m_2DSoundSource.Pause();
             m_pausedAudios.Add(m_2DSoundSource);
@@ -210,8 +218,10 @@ public class SoundManager : SingletonMonoBehaviour<SoundManager>
 
     public void ReStartSound()
     {
+        BGMPlay();
+
         //퍼지된 오디오소스만 리스트에 저장해두었다가 재생시킴.
-        for(int i=0; i<m_pausedAudios.Count; i++)
+        for (int i=0; i<m_pausedAudios.Count; i++)
         {
             m_pausedAudios[0].Play();
         }

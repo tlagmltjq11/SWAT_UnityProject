@@ -72,6 +72,20 @@ public class GameManager : SingletonMonoBehaviour<GameManager>
 
     #region Public Methods
 
+    public void HoldPlayer()
+    {
+        m_playScr.enabled = false;
+        m_camScr.enabled = false;
+        m_sway.enabled = false;
+    }
+
+    public void ReleasePlayer()
+    {
+        m_playScr.enabled = true;
+        m_camScr.enabled = true;
+        m_sway.enabled = true;
+    }
+
     public void HostageRescued()
     {
         foreach (GameObject obj in m_wave2Enemys)
@@ -113,9 +127,7 @@ public class GameManager : SingletonMonoBehaviour<GameManager>
             case eGameState.Normal:
                 Cursor.lockState = CursorLockMode.Locked;
                 Cursor.visible = false;
-                m_playScr.enabled = true;
-                m_camScr.enabled = true;
-                m_sway.enabled = true;
+                ReleasePlayer();
                 SoundManager.Instance.ReStartSound();
                 UIManager.Instance.CloseMenu();
                 break;
@@ -123,9 +135,7 @@ public class GameManager : SingletonMonoBehaviour<GameManager>
             case eGameState.Pause:
                 Cursor.lockState = CursorLockMode.None;
                 Cursor.visible = true;
-                m_playScr.enabled = false;
-                m_camScr.enabled = false;
-                m_sway.enabled = false;
+                HoldPlayer();
                 SoundManager.Instance.StopSound();
                 UIManager.Instance.OpenMenu();
                 break;

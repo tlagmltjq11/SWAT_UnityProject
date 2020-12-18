@@ -9,13 +9,14 @@ public class Door_Controller : MonoBehaviour
     bool m_pushOpen;
     float m_angle;
     GameObject m_player;
+    [SerializeField]
     bool m_isClosed;
     #endregion
 
     #region Unity Methods
     void Start()
     {
-        m_isClosed = true;
+        //m_isClosed = true;
 
         if(m_pushOpen)
         {
