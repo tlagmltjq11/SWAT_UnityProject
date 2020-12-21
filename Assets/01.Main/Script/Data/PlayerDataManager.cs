@@ -34,14 +34,15 @@ public class PlayerDataManager : DonDestroy<PlayerDataManager>
     public void LoadData()
     {
         //key만 알고있어도 가져올 수 있지만, 저장한적이 없다면 뒤에 있는 디폴트값을 가져오게 된다.
-        m_myData.m_bestScore[0] = PlayerPrefs.GetInt("stage1" + "Score");
-        m_myData.m_bestScore[1] = PlayerPrefs.GetInt("stage2" + "Score");
-        m_myData.m_bestScore[2] = PlayerPrefs.GetInt("stage3" + "Score");
+        m_myData.m_bestScore[1] = PlayerPrefs.GetInt("Stage1" + "Score");
+        m_myData.m_bestScore[2] = PlayerPrefs.GetInt("Stage2" + "Score");
+        m_myData.m_bestScore[3] = PlayerPrefs.GetInt("Stage3" + "Score");
 
-        m_myData.m_bestTime[0] = PlayerPrefs.GetInt("stage1" + "Time");
-        m_myData.m_bestTime[1] = PlayerPrefs.GetInt("stage2" + "Time");
-        m_myData.m_bestTime[2] = PlayerPrefs.GetInt("stage3" + "Time");
+        m_myData.m_bestTime[1] = PlayerPrefs.GetInt("Stage1" + "Time");
+        m_myData.m_bestTime[2] = PlayerPrefs.GetInt("Stage2" + "Time");
+        m_myData.m_bestTime[3] = PlayerPrefs.GetInt("Stage3" + "Time");
     }
+
 
     private void Start()
     {

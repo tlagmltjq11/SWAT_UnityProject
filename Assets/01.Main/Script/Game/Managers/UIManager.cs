@@ -364,16 +364,27 @@ public class UIManager : SingletonMonoBehaviour<UIManager>
         int bestTime = PlayerDataManager.Instance.GetBestTime(temp);
         int bestScore = PlayerDataManager.Instance.GetBestScore(temp);
 
-
-        if (time >= bestTime)
+        if (flag)
         {
-            m_bestTimeText.gameObject.SetActive(false);
+            if (bestTime == 0f)
+            {
+                m_bestTimeText.gameObject.SetActive(true);
+                PlayerDataManager.Instance.SetBestTime(temp, time);
+            }
+            else
+            {
+                if (time >= bestTime)
+                {
+                    m_bestTimeText.gameObject.SetActive(false);
+                }
+                else if (time < bestTime) //시간이 더 적게걸렸을때 미션도 성공해야 타임은 갱신.
+                {
+                    m_bestTimeText.gameObject.SetActive(true);
+                    PlayerDataManager.Instance.SetBestTime(temp, time);
+                }
+            }
         }
-        else if(time < bestTime && flag) //시간이 더 적게걸렸을때 미션도 성공해야 타임은 갱신.
-        {
-            m_bestTimeText.gameObject.SetActive(true);
-            PlayerDataManager.Instance.SetBestTime(temp, time);
-        }
+        
 
         int minute, second;
         minute = time / 60;

@@ -32993,7 +32993,7 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   m_text: "Mission : \uAC74\uBB3C\uC758 \uBD09\uC1C4\uB41C \uC785\uAD6C\uB97C \uC218\uB958\uD0C4\uC73C\uB85C
-    \uD574\uC81C\uD558\uACE0, \uC2DC\uAC04\uB0B4\uC5D0 \uC778\uC9C8\uC744 \uAD6C\uCD9C\uD558\uC138\uC694."
+    \uD574\uC81C\uD558\uACE0, \uC778\uC9C8\uC744 \uAD6C\uCD9C\uD558\uC138\uC694."
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 277c19a6344689344a80d17b1bca087b, type: 2}
   m_sharedMaterial: {fileID: 977854444420712096, guid: 277c19a6344689344a80d17b1bca087b,
@@ -35119,7 +35119,7 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   m_text: "Mission : \uAC74\uBB3C\uC758 \uBD09\uC1C4\uB41C \uC785\uAD6C\uB97C \uC218\uB958\uD0C4\uC73C\uB85C
-    \uD574\uC81C\uD558\uACE0, \uC2DC\uAC04\uB0B4\uC5D0 \uC778\uC9C8\uC744 \uAD6C\uCD9C\uD558\uC138\uC694."
+    \uD574\uC81C\uD558\uACE0, \uC778\uC9C8\uC744 \uAD6C\uCD9C\uD558\uC138\uC694."
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 277c19a6344689344a80d17b1bca087b, type: 2}
   m_sharedMaterial: {fileID: 977854444420712096, guid: 277c19a6344689344a80d17b1bca087b,
@@ -38838,7 +38838,7 @@ MonoBehaviour:
   m_currentATW: {fileID: 0}
   m_upperBodyLean: {fileID: 69517246}
   m_flashLight: {fileID: 534279595}
-  m_runSpeed: 10
+  m_runSpeed: 7.5
   m_walkSpeed: 1.5
   m_crouchSpeed: 2.5
   m_normalSpeed: 3.5

@@ -45,10 +45,10 @@ public class TitleController : MonoBehaviour
         m_BGMSlider.value = PlayerPrefs.GetFloat("BGMVolume");
         m_SFXSlider.value = PlayerPrefs.GetFloat("SFXVolume");
 
-        for(int i=0; i<m_bestScore.Length; i++)
+        for (int i = 0; i < m_bestScore.Length; i++)
         {
-            m_bestScore[i].text = "Best Score : " + PlayerDataManager.Instance.GetBestScore((PlayerData.eStage)i).ToString();
-            m_bestTime[i].text = "Best Time  : " + PlayerDataManager.Instance.GetBestTime((PlayerData.eStage)i).ToString();
+            m_bestScore[i].text = "Best Score : " + PlayerDataManager.Instance.GetBestScore((PlayerData.eStage)(i + 1)).ToString();
+            m_bestTime[i].text = "Best Time  : " + PlayerDataManager.Instance.GetBestTime((PlayerData.eStage)(i + 1)).ToString();
         }
 
         m_bgmAudioSource.Play();
