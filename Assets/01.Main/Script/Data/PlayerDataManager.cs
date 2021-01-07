@@ -46,6 +46,7 @@ public class PlayerDataManager : DonDestroy<PlayerDataManager>
 
     private void Start()
     {
+        PlayerPrefs.DeleteAll();
         LoadData();
     }
 }

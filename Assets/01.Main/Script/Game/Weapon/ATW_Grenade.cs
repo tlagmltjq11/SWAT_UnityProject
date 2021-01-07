@@ -60,7 +60,6 @@ public class ATW_Grenade : ATW
                 int layer = (1 << LayerMask.NameToLayer("Ground")) | (1 << LayerMask.NameToLayer("Interactable")) | (1 << LayerMask.NameToLayer("Movable"));
                 if(Physics.Raycast(gameObject.transform.position, dir.normalized, out check, m_explosionRadius, layer))
                 {
-                    Debug.Log(check.transform.name);
                     continue;
                 }
 
