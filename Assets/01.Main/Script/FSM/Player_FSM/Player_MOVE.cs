@@ -91,7 +91,6 @@ public class Player_MOVE : FSMSingleton<Player_MOVE>, IFSMState<Player_StateMana
         }
         else
         {
-            //수정사항*************************************************************************
             float lastHeight = e.m_charCon.height;
             e.m_charCon.height = Mathf.Lerp(e.m_charCon.height, e.m_playerHeight, Time.deltaTime * 8f);
             e.m_groundCheck.localPosition = e.m_normalCheckPos;

@@ -160,7 +160,7 @@ public class Weapon_AKM : Weapon
 
 				if (enemy)
 				{
-					if (hit.collider.gameObject.tag.Equals("HeadShot"))
+					if (hit.collider.gameObject.CompareTag("HeadShot"))
 					{
 						SoundManager.Instance.Play2DSound(SoundManager.eAudioClip.HEADSHOT, 1.5f);
 						enemy.Damaged(m_power * 100f);

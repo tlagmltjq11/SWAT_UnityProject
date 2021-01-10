@@ -123,7 +123,7 @@ public class Hostage_Controller : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        if (other.gameObject.layer.Equals(LayerMask.NameToLayer("Player")) && m_state == eState.TIED)
+        if ((other.gameObject.layer.Equals(LayerMask.NameToLayer("Player")) || other.gameObject.name.Equals("Player")) && m_state == eState.TIED )
         {
             m_player = other.transform.root.gameObject;
             UIManager.Instance.ProgressObjOnOff(true);
@@ -132,7 +132,7 @@ public class Hostage_Controller : MonoBehaviour
 
     private void OnTriggerExit(Collider other)
     {
-        if (other.gameObject.layer.Equals(LayerMask.NameToLayer("Player")) && m_state == eState.TIED)
+        if ((other.gameObject.layer.Equals(LayerMask.NameToLayer("Player")) || other.gameObject.name.Equals("Player")) && m_state == eState.TIED)
         {
             UIManager.Instance.ProgressObjOnOff(false);
         }
