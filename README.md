@@ -1,5 +1,5 @@
 # V_Project
-프로젝트 설명은 아래 [링크][1]를 통해 영상으로 확인할 수 있고, 코드와 같은 부가설명은 [About Dev][2] 부분을 참고해주세요.<br>
+프로젝트 설명은 아래 [링크](#1)를 통해 영상으로 확인할 수 있고, 코드와 같은 부가설명은 [About Dev](#2) 부분을 참고해주세요.<br>
 <br>
 
 ### About Project.:two_men_holding_hands:
@@ -7,12 +7,12 @@ Irrational Games에서 개발한 택티컬 슈팅 게임 SWAT4를 모작한 프�
 <br>
 
 ### Video.:video_camera:
-[1]: **클릭해주세요.**<br>
+<div id="1">**클릭해주세요.**</div><br>
 [![시연영상](https://img.youtube.com/vi/TNQ0OKnjaWw/0.jpg)](https://www.youtube.com/watch?v=TNQ0OKnjaWw)<br>
 <br>
 
 ### About Dev.:nut_and_bolt:
-[2]: ㅇㅇㅇ
+<div id="2"></div><br>
 <br>
 
 
