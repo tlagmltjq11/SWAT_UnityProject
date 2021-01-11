@@ -13,13 +13,13 @@ Irrational Games에서 개발한 택티컬 슈팅 게임 SWAT4를 모작한 프�
 
 ### About Dev.:nut_and_bolt: <div id="2"></div>
 <details>
-<summary>&nbsp;&nbsp;&nbsp;&nbsp;무기관련 Code 접기/펼치기</summary>
+<summary>무기관련 Code 접기/펼치기</summary>
 <div markdown="1">
 
 <br>
 
 <details>
-<summary>&nbsp;&nbsp;&nbsp;&nbsp;Weapon code 접기/펼치기</summary>
+<summary>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Weapon code 접기/펼치기</summary>
 <div markdown="1">
 	
 ```c#
