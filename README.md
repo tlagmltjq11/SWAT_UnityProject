@@ -446,13 +446,13 @@ public abstract class ATW : MonoBehaviour //Ahead Thrown Weapon 투척무기
 {
     #region Field
     public Rigidbody m_rigid;
-    public GameObject m_effectObj;
-    public GameObject m_meshObj;
-    public int m_remainNum;
-    public float m_timeToOper;
+    public GameObject m_effectObj; //폭발 이펙트
+    public GameObject m_meshObj; //몸체 Mesh -> 폭발 시 비활성화
+    public int m_remainNum; //남은 갯수
+    public float m_timeToOper; //동작하기까지 걸리는 시간
     public string m_name;
     public float m_power;
-    public float m_explosionRadius;
+    public float m_explosionRadius; //폭발범위
     #endregion
 
     #region Abstract Methods
@@ -469,7 +469,7 @@ public abstract class ATW : MonoBehaviour //Ahead Thrown Weapon 투척무기
 <div markdown="1">
 	
 ```c#
-	public class ATW_Grenade : ATW
+public class ATW_Grenade : ATW
 {
     #region Unity Methods
     void Start()
@@ -514,12 +514,14 @@ public abstract class ATW : MonoBehaviour //Ahead Thrown Weapon 투척무기
         m_effectObj.SetActive(true);
 
         //랜덤으로 폭발음을 재생
-        SoundManager.Instance.Play3DSound(Random.Range((int)SoundManager.eAudioClip.ATW_EXPLOSION1, (int)SoundManager.eAudioClip.ATW_IMPACTONTGROUND), gameObject.transform.position, 40f, 2f);
+        SoundManager.Instance.Play3DSound(Random.Range((int)SoundManager.eAudioClip.ATW_EXPLOSION1, 
+			                   (int)SoundManager.eAudioClip.ATW_IMPACTONTGROUND), gameObject.transform.position, 40f, 2f);
 
         //대상 레이어만 지정
         int layerMask = ((1 << LayerMask.NameToLayer("Enemy_ExplosionHitCol")) | (1 << LayerMask.NameToLayer("Movable")));
         //SphereCastAll을 통해서 수류탄의 폭발지점 반경내에있는 대상 레이어의 모든 hit정보를 받아온다.
-        RaycastHit[] hits = Physics.SphereCastAll(gameObject.transform.position, m_explosionRadius, Vector3.up, 0, layerMask, QueryTriggerInteraction.UseGlobal);
+        RaycastHit[] hits = Physics.SphereCastAll(gameObject.transform.position, m_explosionRadius, Vector3.up, 0, layerMask,
+						   QueryTriggerInteraction.UseGlobal);
 
         foreach(RaycastHit hit in hits)
         {
@@ -538,7 +540,9 @@ public abstract class ATW : MonoBehaviour //Ahead Thrown Weapon 투척무기
                 //적군과 수류탄사이에 장애물이 가로막고있는지 Raycast로 판별 후, 가로막혀있다면 데미지를 주지않는다.
                 RaycastHit check;
                 var dir = hit.transform.position - gameObject.transform.position;
-                int layer = (1 << LayerMask.NameToLayer("Ground")) | (1 << LayerMask.NameToLayer("Interactable")) | (1 << LayerMask.NameToLayer("Movable"));
+                int layer = (1 << LayerMask.NameToLayer("Ground")) | (1 << LayerMask.NameToLayer("Interactable")) |
+		              (1 << LayerMask.NameToLayer("Movable"));
+			      
                 if(Physics.Raycast(gameObject.transform.position, dir.normalized, out check, m_explosionRadius, layer))
                 {
                     continue;
@@ -560,9 +564,9 @@ public abstract class ATW : MonoBehaviour //Ahead Thrown Weapon 투척무기
                         rig.AddExplosionForce(500 * (m_power / distance), gameObject.transform.position, m_explosionRadius, 8f);
                     }
                 }
-
             }
-            else if(hit.transform.gameObject.layer.Equals(LayerMask.NameToLayer("Movable"))) //적군이 아닌 크래쉬박스와 같은 Movalble 오브젝트일 경우
+	    //적군이 아닌 크래쉬박스와 같은 Movalble 오브젝트일 경우
+            else if(hit.transform.gameObject.layer.Equals(LayerMask.NameToLayer("Movable")))
             {
                 Crash_Box cb = hit.transform.gameObject.GetComponent<Crash_Box>();
                 cb.Crash();
@@ -575,8 +579,7 @@ public abstract class ATW : MonoBehaviour //Ahead Thrown Weapon 투척무기
                 }
             }
         }
-
-        //삭제시킨다.
+	
         Destroy(gameObject, 2f);
     }
     #endregion
