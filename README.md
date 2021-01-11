@@ -13,18 +13,23 @@ Irrational Games에서 개발한 택티컬 슈팅 게임 SWAT4를 모작한 프�
 
 ### About Dev.:nut_and_bolt: <div id="2"></div>
 <details>
+<summary>총기와 투척무기 Class 접기/펼치기</summary>
+<div markdown="1">
+
+총기
+<details>
 <summary>Weapon 접기/펼치기</summary>
 <div markdown="1">
-    
+	
 ```c#
-
 //추상클래스 Weapon
 public abstract class Weapon : MonoBehaviour
 {
     #region Field
-    #region References
-    // References
-    public Transform m_shootPoint;
+    
+    	#region References
+    	// References
+    	public Transform m_shootPoint;
 	public Animator m_anim;
 	public ParticleSystem muzzleFlash;
 	public GameObject m_player;
@@ -36,6 +41,7 @@ public abstract class Weapon : MonoBehaviour
 	public Transform m_casingPoint;
 	public GameObject[] m_sights;
 	#endregion
+	
 	#region Weapon info
 	// Weapon Specification
 	public string m_weaponName;
@@ -58,22 +64,22 @@ public abstract class Weapon : MonoBehaviour
 	public float m_recoilAmount;
 	public float m_recoilVert;
 	public float m_recoiltHoriz;
-    #endregion
-    #region State Check vars
-    // 각종 상태체크
-    public AnimatorStateInfo m_info;
+    	#endregion
+    
+    	#region State Check vars
+    	// 각종 상태체크
+    	public AnimatorStateInfo m_info;
 	public bool m_isReloading;
 	public bool m_isDrawing;
 	public bool m_isAiming;
 	public bool m_isAimOutOver;
 	public bool m_isFiring;
-
 	public float m_fireTimer;
-    #endregion
+    	#endregion
     #endregion
 
-    #region Abstract Methods
-    public abstract void Fire();
+    	#region Abstract Methods
+    	public abstract void Fire();
 	public abstract void StopFiring();
 	public abstract void Reload();
 	public abstract void AimIn();
@@ -84,10 +90,17 @@ public abstract class Weapon : MonoBehaviour
 	public abstract void CasingEffect();
 	public abstract void JumpAccuracy(bool j);
 	public abstract void CrouchAccuracy(bool c);
-    #endregion
+    	#endregion
 }
+```
+</div>
+</details>
 
-
+<details>
+<summary>Weapon_AKM 접기/펼치기</summary>
+<div markdown="1">
+	
+```c#
 //AKM 
 public class Weapon_AKM : Weapon
 {
@@ -359,6 +372,9 @@ public class Weapon_AKM : Weapon
 }
     #endregion
 ```
+
+</div>
+</details>
 
 공통된 내용(필드나 메소드)들을 추출하여 통일된 내용으로 작성하도록 상위 클래스인 Weapon 추상클래스를 구성했습니다.
 모든 총기 클래스는 해당 Weapon 클래스를 상속받아, 각자 필요한 메소드나 필드만 추가로 정의하고, 추상 메소드를 오버라이딩하여 클래스마다 다르게 실행될 로직을 작성해 주면 됩니다.
