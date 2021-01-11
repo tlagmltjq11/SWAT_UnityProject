@@ -13,7 +13,7 @@ Irrational Games에서 개발한 택티컬 슈팅 게임 SWAT4를 모작한 프�
 
 ### About Dev.:nut_and_bolt: <div id="2"></div>
 <details>
-<summary>총기와 투척무기 Class 접기/펼치기</summary>
+<summary>무기관련 Class 접기/펼치기</summary>
 <div markdown="1">
 
 <br>
@@ -565,6 +565,8 @@ public class ATW_Grenade : ATW
 
 </div>
 </details>
+
+<br>
 
 **Explanation**<br>
 공통된 내용(필드나 메소드)들을 추출하여 통일된 내용으로 작성하도록 상위 클래스인 Weapon, ATW 추상클래스를 구현했습니다. 모든 총기 및 투척무기 클래스는 해당 추상클래스를 상속받아, 
