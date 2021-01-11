@@ -416,27 +416,6 @@ public class Weapon_AKM : Weapon
 
 <br>
 
-**Explanation**<br>
-공통된 내용(필드나 메소드)들을 추출하여 통일된 내용으로 작성하도록 상위 클래스인 Weapon 추상클래스를 구성했습니다. 모든 총기 클래스는 해당 Weapon 클래스를 상속받아, 
-각자 필요한 메소드나 필드만 추가로 정의하고, 추상 메소드를 오버라이딩하여 클래스마다 다르게 실행될 로직을 작성해 주면 됩니다.
-이러한 구성을 통해서, 코드들을 규격화 할 수 있었고 아래와 같이 다형성 사용, 느슨한 결합 등을 이룰 수 있었습니다.
-
-```c#
-//플레이어 컨트롤 스크립트
-public Weapon m_currentWeapon; //현재 무기
-...
-    if (Input.GetButton("Fire1"))
-    {
-        m_currentWeapon.Fire(); //다형성
-    }
-...
-    void SetCurrentWeapon(Weapon weapon) //느슨한 결합
-    {
-        m_currentWeapon = weapon;
-    }
-...
-```
-
 <details>
 <summary>ATW code 접기/펼치기</summary>
 <div markdown="1">
@@ -465,7 +444,7 @@ public abstract class ATW : MonoBehaviour //Ahead Thrown Weapon 투척무기
 </details>
 
 <details>
-<summary>ATW code 접기/펼치기</summary>
+<summary>ATW_Grenade code 접기/펼치기</summary>
 <div markdown="1">
 	
 ```c#
@@ -515,7 +494,7 @@ public class ATW_Grenade : ATW
 
         //랜덤으로 폭발음을 재생
         SoundManager.Instance.Play3DSound(Random.Range((int)SoundManager.eAudioClip.ATW_EXPLOSION1, 
-			                   (int)SoundManager.eAudioClip.ATW_IMPACTONTGROUND), gameObject.transform.position, 40f, 2f);
+			                  (int)SoundManager.eAudioClip.ATW_IMPACTONTGROUND), gameObject.transform.position, 40f, 2f);
 
         //대상 레이어만 지정
         int layerMask = ((1 << LayerMask.NameToLayer("Enemy_ExplosionHitCol")) | (1 << LayerMask.NameToLayer("Movable")));
@@ -588,6 +567,27 @@ public class ATW_Grenade : ATW
 
 </div>
 </details>
+
+**Explanation**<br>
+공통된 내용(필드나 메소드)들을 추출하여 통일된 내용으로 작성하도록 상위 클래스인 Weapon 추상클래스를 구성했습니다. 모든 총기 클래스는 해당 Weapon 클래스를 상속받아, 
+각자 필요한 메소드나 필드만 추가로 정의하고, 추상 메소드를 오버라이딩하여 클래스마다 다르게 실행될 로직을 작성해 주면 됩니다.
+이러한 구성을 통해서, 코드들을 규격화 할 수 있었고 아래와 같이 다형성 사용, 느슨한 결합 등을 이룰 수 있었습니다.
+
+```c#
+//플레이어 컨트롤 스크립트
+public Weapon m_currentWeapon; //현재 무기
+...
+    if (Input.GetButton("Fire1"))
+    {
+        m_currentWeapon.Fire(); //다형성
+    }
+...
+    void SetCurrentWeapon(Weapon weapon) //느슨한 결합
+    {
+        m_currentWeapon = weapon;
+    }
+...
+```
 
 </div>
 </details>
