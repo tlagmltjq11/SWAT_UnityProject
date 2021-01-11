@@ -427,10 +427,10 @@ public Weapon m_currentWeapon; //현재 무기
 ...
     if (Input.GetButton("Fire1"))
     {
-        m_currentWeapon.Fire();
+        m_currentWeapon.Fire(); //다형성
     }
 ...
-    void SetCurrentWeapon(Weapon weapon)
+    void SetCurrentWeapon(Weapon weapon) //느슨한 결합
     {
         m_currentWeapon = weapon;
     }
