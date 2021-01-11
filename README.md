@@ -930,8 +930,7 @@ public class Enemy_StateManager : FSM<Enemy_StateManager> //상태매니저
         {
             m_hp = 0f;
 	    //죽을때 사운드클립을 랜덤하게 선택해 재생.
-            SoundManager.Instance.Play3DSound(Random.Range((int)SoundManager.eAudioClip.ENEMY_DEATH1, (int)SoundManager.eAudioClip.HITSOUND), 
-	    												gameObject.transform.position, 20f, 1.2f);
+            SoundManager.Instance.Play3DSound(Random.Range((int)SoundManager.eAudioClip.ENEMY_DEATH1, (int)SoundManager.eAudioClip.HITSOUND), gameObject.transform.position, 20f, 1.2f);
             ChangeState(Enemy_DIE.Instance); //현재상태를 Die로 변경.
         }
         else 
@@ -1297,9 +1296,9 @@ public class Hostage_Controller : MonoBehaviour
     eState m_state; //현재 상태
     Animator m_anim; //애니메이터
     NavMeshAgent m_nav;
-    float m_disFromPlayer; //플레이어와의 유지거리
     AnimatorStateInfo m_info; //현재 동작중인 애니메이션 정보
     GameObject m_player; //플레이어
+    float m_disFromPlayer; //플레이어와의 유지거리
     float m_footstepTimer; //발소리 m_footstepCycle 마다 발소리를 재생시키기 위해 시간초를 카운팅하는 변수. 
     float m_footstepCycle; //발소리 재생 간격
     int m_footstepTurn; //왼발, 오른발 번갈아가며 재생하기 위함.
