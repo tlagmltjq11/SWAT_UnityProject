@@ -19,7 +19,7 @@ Irrational Games에서 개발한 택티컬 슈팅 게임 SWAT4를 모작한 프�
 <br>
 
 <details>
-<summary>Weapon code 접기/펼치기</summary>
+<summary>	Weapon code 접기/펼치기</summary>
 <div markdown="1">
 	
 ```c#
