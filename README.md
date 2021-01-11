@@ -434,6 +434,13 @@ public abstract class ATW : MonoBehaviour //Ahead Thrown Weapon 투척무기
     public float m_explosionRadius; //폭발범위
     #endregion
 
+    #region Public Methods
+    public void Starter()
+    {
+        Invoke("Operation", m_timeToOper);
+    }
+    #endregion
+
     #region Abstract Methods
     public abstract void Operation(); //동작
     #endregion
@@ -473,15 +480,6 @@ public class ATW_Grenade : ATW
     #region Abstract Methods Implement
     public override void Operation()
     {
-        StartCoroutine("Operator");
-    }
-    #endregion
-
-    #region Coroutine
-    IEnumerator Operator()
-    {
-        yield return new WaitForSeconds(m_timeToOper);
-
         //파티클시스템을 작동시키기 위해서, 수류탄의 몸체를 정지시킨 후 똑바로 세워놓음.
         m_rigid.velocity = Vector3.zero;
         m_rigid.angularVelocity = Vector3.zero;
@@ -569,13 +567,14 @@ public class ATW_Grenade : ATW
 </details>
 
 **Explanation**<br>
-공통된 내용(필드나 메소드)들을 추출하여 통일된 내용으로 작성하도록 상위 클래스인 Weapon 추상클래스를 구성했습니다. 모든 총기 클래스는 해당 Weapon 클래스를 상속받아, 
-각자 필요한 메소드나 필드만 추가로 정의하고, 추상 메소드를 오버라이딩하여 클래스마다 다르게 실행될 로직을 작성해 주면 됩니다.
-이러한 구성을 통해서, 코드들을 규격화 할 수 있었고 아래와 같이 다형성 사용, 느슨한 결합 등을 이룰 수 있었습니다.
+공통된 내용(필드나 메소드)들을 추출하여 통일된 내용으로 작성하도록 상위 클래스인 Weapon, ATW 추상클래스를 구성했습니다. 모든 총기 및 투척무기 클래스는 적절한 클래스를 상속받아, 
+각자 필요한 메소드나 필드만 추가로 정의하고, 추상 메소드를 오버라이딩하여 클래스마다 다르게 실행될 로직을 작성해 주면 됩니다. 이러한 구성을 통해서, 코드들을 규격화 할 수 있었고 
+아래와 같이 다형성 사용, 느슨한 결합 등을 이룰 수 있었습니다.
 
 ```c#
-//플레이어 컨트롤 스크립트
-public Weapon m_currentWeapon; //현재 무기
+//플레이어 컨트롤 스크립트(간략화)
+public Weapon m_currentWeapon; //현재 총기
+public ATW m_currentATW; //현재 투척무기
 ...
     if (Input.GetButton("Fire1"))
     {
@@ -585,6 +584,20 @@ public Weapon m_currentWeapon; //현재 무기
     void SetCurrentWeapon(Weapon weapon) //느슨한 결합
     {
         m_currentWeapon = weapon;
+    }
+...
+    if (Input.GetKeyDown(KeyCode.G))
+    {
+        if(m_currentATW.m_remainNum > 0)
+        {
+            scr.m_rigid.AddForce(grenade.transform.up * 5f + grenade.transform.forward * 15f, ForceMode.Impulse);
+            scr.Starter(); //다형성
+        }
+    }
+...
+    void SetCurrentATW(ATW atw) //느슨한 결합
+    {
+        m_currentATW = atw;
     }
 ...
 ```
