@@ -25,21 +25,21 @@ Irrational Games에서 개발한 택티컬 슈팅 게임 SWAT4를 모작한 프�
 //추상클래스 Weapon
 public abstract class Weapon : MonoBehaviour
 {
-    #region Field
+    	#region Field
     
     	#region References
     	// References
     	public Transform m_shootPoint;
 	public Animator m_anim;
-	public ParticleSystem muzzleFlash;
+	public ParticleSystem muzzleFlash; //총기화염
 	public GameObject m_player;
 	public Player_StateManager m_stateManager;
 	public Camera m_camera;
 	public CameraRotate m_cameraRotate;
-	public GameObject m_horizonCamRecoil;
-	public GameObject m_verticalCamRecoil;
-	public Transform m_casingPoint;
-	public GameObject[] m_sights;
+	public GameObject m_horizonCamRecoil; //수평반동
+	public GameObject m_verticalCamRecoil; //수직반동
+	public Transform m_casingPoint; //탄피포인트
+	public GameObject[] m_sights; //sight 파츠
 	#endregion
 	
 	#region Weapon info
@@ -49,21 +49,23 @@ public abstract class Weapon : MonoBehaviour
 	public int m_bulletsRemain;
 	public int m_totalMag;
 	public int m_currentBullets;
-	public float m_range;
-	public float m_fireRate;
-	public float m_accuracy;
+	public float m_range; //사정거리
+	public float m_fireRate; //연사력
+	public float m_accuracy; //현재 정확도
 	public float m_power;
-	public float m_originAccuracy;
-	// aim 만들때 사용
+	public float m_originAccuracy; //원래 정확도
+	
+	// 현재 장착한 sight 파츠에 따라 정조준의 최종 포지션이 다름.
 	public Vector3 m_aimPosition;
 	public Vector3 m_dotSightPosition;
 	public Vector3 m_acogSightPosition;
 	public Vector3 m_originalPosition;
+	
 	// 반동 만들때 사용
-	public Vector3 m_recoilKickBack;
-	public float m_recoilAmount;
-	public float m_recoilVert;
-	public float m_recoiltHoriz;
+	public Vector3 m_recoilKickBack; //총기가 뒤로 밀리는 위치
+	public float m_recoilAmount; //반동의 세기
+	public float m_recoilVert; //수직
+	public float m_recoiltHoriz; //수평
     	#endregion
     
     	#region State Check vars
@@ -77,20 +79,20 @@ public abstract class Weapon : MonoBehaviour
 	public float m_fireTimer;
     	#endregion
 	
-    #endregion
+   	 #endregion
 
     	#region Abstract Methods
     	public abstract void Fire();
 	public abstract void StopFiring();
 	public abstract void Reload();
-	public abstract void AimIn();
+	public abstract void AimIn(); //정조준
 	public abstract void AimOut();
-	public abstract void ChangeSight();
-	public abstract void Recoil();
-	public abstract void RecoilBack();
-	public abstract void CasingEffect();
-	public abstract void JumpAccuracy(bool j);
-	public abstract void CrouchAccuracy(bool c);
+	public abstract void ChangeSight(); //파츠 변경
+	public abstract void Recoil(); //반동
+	public abstract void RecoilBack(); //수평반동 회복
+	public abstract void CasingEffect(); //탄피이펙트
+	public abstract void JumpAccuracy(bool j); //점프했을때 정확도
+	public abstract void CrouchAccuracy(bool c); //앉았을때 정확도
     	#endregion
 }
 ```
@@ -108,14 +110,14 @@ public class Weapon_AKM : Weapon
 	#region Abstract Methods Implement
     	public override void Fire()
 	{
-		if (m_fireTimer < m_fireRate)
+		if (m_fireTimer < m_fireRate) //연사력을 시간으로 구현
 		{
 			return;
 		}
 
-		SoundManager.Instance.Play2DSound(SoundManager.eAudioClip.AKM_SHOOT, 0.8f);
+		SoundManager.Instance.Play2DSound(SoundManager.eAudioClip.AKM_SHOOT, 0.8f); //발포음 재생
 
-		if (m_isFiring)
+		if (m_isFiring) //연사중이라면 반동을 지속해서 키워줌
         	{
 			m_recoilVert += 0.15f;
 			m_recoilVert = Mathf.Clamp(m_recoilVert, 1.2f, 3f);
@@ -131,25 +133,29 @@ public class Weapon_AKM : Weapon
 		
 		layerMask = ~layerMask;
 		
+		//레이캐스트 발사 == 총알
 		if (Physics.Raycast(m_shootPoint.position, m_shootPoint.transform.forward + Random.onUnitSphere * m_accuracy,
 		    out hit, m_range, layerMask))
 		{
-			if (hit.collider.gameObject.layer == LayerMask.NameToLayer("Enemy"))
+			if (hit.collider.gameObject.layer == LayerMask.NameToLayer("Enemy")) //적이 맞았을 경우
 			{
-				var blood = ObjPool.Instance.m_bloodPool.Get();
+				var blood = ObjPool.Instance.m_bloodPool.Get(); //블러드 이펙트를 풀에서 꺼냄
 
 				if (blood != null)
 				{
 					blood.gameObject.transform.position = hit.point;
+					//법선벡터를 이용해서 잘보이게 회전시킴.
 					blood.gameObject.transform.rotation = Quaternion.FromToRotation(Vector3.up, hit.normal);
 					blood.gameObject.SetActive(true);
 				}
 
+				//총을 맞은 적
 				Enemy_StateManager enemy = hit.transform.GetComponentInParent<Enemy_StateManager>();
 
 				if (enemy)
 				{
-					if (hit.collider.gameObject.CompareTag("HeadShot"))
+					//compareTag를 이용!
+					if (hit.collider.gameObject.CompareTag("HeadShot")) //헤드샷 판별
 					{
 						SoundManager.Instance.Play2DSound(SoundManager.eAudioClip.HEADSHOT, 1.5f);
 						enemy.Damaged(m_power * 100f);
@@ -161,9 +167,9 @@ public class Weapon_AKM : Weapon
 					}
 				}
 			}
-			else
+			else //적이 아닐 경우
 			{
-				var hitHole = ObjPool.Instance.m_hitHoleObjPool.Get();
+				var hitHole = ObjPool.Instance.m_hitHoleObjPool.Get(); //탄흔 이펙트를 풀에서 꺼냄.
 
 				if (hitHole != null)
 				{
@@ -182,13 +188,15 @@ public class Weapon_AKM : Weapon
 					hitSpark.gameObject.transform.rotation = Quaternion.FromToRotation(Vector3.up, hit.normal);
 					hitSpark.gameObject.SetActive(true);
 				}
-
+				
+				//Movalble은 리지드바디를 가진 오브젝트들의 레이어임.
 				if (hit.transform.gameObject.layer.Equals(LayerMask.NameToLayer("Movable")))
 				{
 					Rigidbody rig = hit.transform.GetComponent<Rigidbody>();
 
 					if (rig)
 					{
+						//피격된 지점에서 물리힘을 가해줌.
 						rig.AddForceAtPosition(m_shootPoint.forward * m_power * 70f, m_shootPoint.position);
 					}
 				}
@@ -197,14 +205,14 @@ public class Weapon_AKM : Weapon
 
 		m_currentBullets--;
 		m_fireTimer = 0.0f;
-		m_anim.CrossFadeInFixedTime("FIRE", 0.01f);
+		m_anim.CrossFadeInFixedTime("FIRE", 0.01f); //애니메이션을 즉시 FIRE로 바꿔줌.
 
-		muzzleFlash.Play();
-		Recoil();
-		CasingEffect();
+		muzzleFlash.Play(); //총기화염 play
+		Recoil(); //반동
+		CasingEffect(); //탄피 이펙트 생성
 	}
 
-	public override void StopFiring()
+	public override void StopFiring() //연사를 멈출 경우 반동 회복
 	{
 		m_recoilVert = 1.2f;
 		m_recoiltHoriz = 0.65f;
@@ -218,19 +226,19 @@ public class Weapon_AKM : Weapon
 		}
 
 		SoundManager.Instance.Play2DSound_Play((int)SoundManager.eAudioClip.AKM_RELOAD, 1f);
-		m_anim.CrossFadeInFixedTime("RELOAD", 0.01f);
+		m_anim.CrossFadeInFixedTime("RELOAD", 0.01f); //애니메이션을 즉시 RELOAD로 바꿔줌.
 	}
 
-	public override void AimIn()
+	public override void AimIn() //정조준
 	{
-		m_anim.SetBool("ISAIM", true);
+		m_anim.SetBool("ISAIM", true); //IDLE 애니메이션이 재생되지 않도록 ISAIM으로 변경.
 		m_isAiming = true;
 
-		m_accuracy = m_accuracy / 4f;
+		m_accuracy = m_accuracy / 4f; //정확도를 높여줌.
 
 		if (UIManager.Instance != null)
 		{
-			UIManager.Instance.CrossHairOnOff(false);
+			UIManager.Instance.CrossHairOnOff(false); //크로스헤어를 비활성화 시킨다.
 		}
 		SoundManager.Instance.Play2DSound(SoundManager.eAudioClip.AIM_IN, 3.5f);
 	}
@@ -239,7 +247,8 @@ public class Weapon_AKM : Weapon
 	{
 		m_isAiming = false;
 		m_anim.SetBool("ISAIM", false);
-
+		
+		//정확도를 다시 낮춰준다.
 		if(m_stateManager.m_isCrouching)
         	{
 			m_accuracy = m_originAccuracy / 2f;
@@ -259,7 +268,7 @@ public class Weapon_AKM : Weapon
 		}
 	}
 
-    	public override void ChangeSight()
+    	public override void ChangeSight() //
     	{
 		bool check = false;
 		int index = 0;
@@ -290,7 +299,7 @@ public class Weapon_AKM : Weapon
         	}
     	}
 
-    	public override void Recoil()
+    	public override void Recoil() //반동
 	{
 		Vector3 HorizonCamRecoil = new Vector3(0f, Random.Range(-m_recoiltHoriz, m_recoiltHoriz), 0f);
 		Vector3 VerticalCamRecoil = new Vector3(-m_recoilVert, 0f, 0f);
@@ -300,41 +309,48 @@ public class Weapon_AKM : Weapon
 			Vector3 gunRecoil = new Vector3(Random.Range(-m_recoilKickBack.x, m_recoilKickBack.x),
 			                                m_recoilKickBack.y, m_recoilKickBack.z);
 							
+			//총기가 뒤로 밀리는 반동
 			transform.localPosition = Vector3.Lerp(transform.localPosition, 
 			                                       transform.localPosition + gunRecoil, m_recoilAmount);
-
+			
+			//수평반동
 			m_horizonCamRecoil.transform.localRotation = Quaternion.Slerp(m_horizonCamRecoil.transform.localRotation,
 			Quaternion.Euler(m_horizonCamRecoil.transform.localEulerAngles + HorizonCamRecoil), m_recoilAmount);
 			
-			m_cameraRotate.VerticalCamRotate(-VerticalCamRecoil.x); //현재 이걸로 수직반동 올리는 중임.
+			//수직반동
+			m_cameraRotate.VerticalCamRotate(-VerticalCamRecoil.x);
 		}
 		else
 		{
 			Vector3 gunRecoil = new Vector3(Random.Range(-m_recoilKickBack.x, m_recoilKickBack.x) / 2f, 0, 
 			                                 m_recoilKickBack.z);
 							 
+			//총기가 뒤로 밀리는 반동		 
 			transform.localPosition = Vector3.Lerp(transform.localPosition, transform.localPosition + gunRecoil, 
 			                                        m_recoilAmount);
-
+			
+			//수평반동
 			m_horizonCamRecoil.transform.localRotation = Quaternion.Slerp(m_horizonCamRecoil.transform.localRotation,
 			Quaternion.Euler(m_horizonCamRecoil.transform.localEulerAngles + HorizonCamRecoil / 1.5f), m_recoilAmount);
 			
+			//수직반동
 			m_cameraRotate.VerticalCamRotate(-VerticalCamRecoil.x / 2f); //현재 이걸로 수직반동 올리는 중임.
 		}
 	}
 
-	public override void RecoilBack()
+	public override void RecoilBack() //수평반동 -> Update문에서 호출해준다.
 	{
 		m_horizonCamRecoil.transform.localRotation = Quaternion.Slerp(m_horizonCamRecoil.transform.localRotation, 
 		                                                              Quaternion.Euler(0f, 0f, 0f), Time.deltaTime * 3f);
 	}
 
-	public override void CasingEffect()
+	public override void CasingEffect() //탄피 이펙트
 	{
+		//매번 랜덤한 각도로 튕겨져 나감.
 		Quaternion randomQuaternion = new Quaternion(Random.Range(0f, 360f), Random.Range(0f, 360f), 
 		                                              Random.Range(0f, 360f), 1);
 							      
-		var casing = ObjPool.Instance.m_casingPool.Get();
+		var casing = ObjPool.Instance.m_casingPool.Get(); //풀에서 탄피를 꺼냄.
 
 		if (casing != null)
 		{
@@ -345,6 +361,7 @@ public class Weapon_AKM : Weapon
 
 			casing.gameObject.GetComponent<Rigidbody>().isKinematic = false;
 			casing.gameObject.SetActive(true);
+			//매번 랜덤한 힘을 가해준다.
 			casing.gameObject.GetComponent<Rigidbody>().AddRelativeForce(
 				new Vector3(Random.Range(50f, 100f), Random.Range(50f, 100f), Random.Range(-10f, 20f)));
 			                                                             						     
@@ -352,7 +369,7 @@ public class Weapon_AKM : Weapon
 		}
 	}
 
-	public override void JumpAccuracy(bool j)
+	public override void JumpAccuracy(bool j) //점프시에 정확도 조정
     	{
 		if(j)
         	{
@@ -371,7 +388,7 @@ public class Weapon_AKM : Weapon
         	}
     	}
 
-	public override void CrouchAccuracy(bool c)
+	public override void CrouchAccuracy(bool c) //앉았을 시 정확도 조정
     	{
 		if (c)
         	{
