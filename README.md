@@ -16,9 +16,8 @@ Irrational Games에서 개발한 택티컬 슈팅 게임 SWAT4를 모작한 프�
 <summary>총기와 투척무기 Class 접기/펼치기</summary>
 <div markdown="1">
 
-총기
 <details>
-<summary>Weapon 접기/펼치기</summary>
+<summary>Weapon code 접기/펼치기</summary>
 <div markdown="1">
 	
 ```c#
@@ -97,15 +96,15 @@ public abstract class Weapon : MonoBehaviour
 </details>
 
 <details>
-<summary>Weapon_AKM 접기/펼치기</summary>
+<summary>Weapon_AKM code 접기/펼치기</summary>
 <div markdown="1">
 	
 ```c#
 //AKM 
 public class Weapon_AKM : Weapon
 {
-#region Abstract Methods Implement
-    public override void Fire()
+	#region Abstract Methods Implement
+    	public override void Fire()
 	{
 		if (m_fireTimer < m_fireRate)
 		{
@@ -115,17 +114,17 @@ public class Weapon_AKM : Weapon
 		SoundManager.Instance.Play2DSound(SoundManager.eAudioClip.AKM_SHOOT, 0.8f);
 
 		if (m_isFiring)
-        {
+        	{
 			m_recoilVert += 0.15f;
 			m_recoilVert = Mathf.Clamp(m_recoilVert, 1.2f, 3f);
-
 			m_recoiltHoriz += 0.05f;
 			m_recoiltHoriz = Mathf.Clamp(m_recoiltHoriz, 0.4f, 0.8f);
-        }
+        	}
 
 		RaycastHit hit;
 
-		int layerMask = ((1 << LayerMask.NameToLayer("Player")) | (1 << LayerMask.NameToLayer("Sfx")) | (1 << LayerMask.NameToLayer("Interactable")) | (1 << LayerMask.NameToLayer("Player_Throw")) | (1 << LayerMask.NameToLayer("Enemy_ExplosionHitCol")));
+		int layerMask = ((1 << LayerMask.NameToLayer("Player")) | (1 << LayerMask.NameToLayer("Sfx")) | 
+		(1 << LayerMask.NameToLayer("Interactable")) | (1 << LayerMask.NameToLayer("Player_Throw")) | (1 << LayerMask.NameToLayer("Enemy_ExplosionHitCol")));
 		layerMask = ~layerMask;
 		
 		if (Physics.Raycast(m_shootPoint.position, m_shootPoint.transform.forward + Random.onUnitSphere * m_accuracy, out hit, m_range, layerMask))
@@ -236,15 +235,15 @@ public class Weapon_AKM : Weapon
 		m_anim.SetBool("ISAIM", false);
 
 		if(m_stateManager.m_isCrouching)
-        {
+        	{
 			m_accuracy = m_originAccuracy / 2f;
-        }
+        	}
 		else if(!m_stateManager.m_isGrounded)
-        {
+       		{
 			m_accuracy = m_originAccuracy * 5f;
-        }
+        	}
 		else
-        {
+        	{
 			m_accuracy = m_originAccuracy;
 		}
 
@@ -254,38 +253,38 @@ public class Weapon_AKM : Weapon
 		}
 	}
 
-    public override void ChangeSight()
-    {
+    	public override void ChangeSight()
+    	{
 		bool check = false;
 		int index = 0;
 
 		for(int i=0; i<m_sights.Length; i++)
-        {
+        	{
 			if(m_sights[i].activeSelf)
-            {
+            		{
 				check = true;
 				index = i;
 				break;
-            }
-        }
+            		}
+       		}
 		
 		if(check)
-        {
+        	{
 			m_sights[index].SetActive(false);
 			
 			if(index + 1 < m_sights.Length)
-            {
+            		{
 				m_sights[index + 1].SetActive(true);
 			}
 
-        }
+        	}
 		else
-        {
+		{
 			m_sights[index].SetActive(true);
-        }
-    }
+        	}
+    	}
 
-    public override void Recoil()
+    	public override void Recoil()
 	{
 		Vector3 HorizonCamRecoil = new Vector3(0f, Random.Range(-m_recoiltHoriz, m_recoiltHoriz), 0f);
 		Vector3 VerticalCamRecoil = new Vector3(-m_recoilVert, 0f, 0f);
@@ -295,7 +294,9 @@ public class Weapon_AKM : Weapon
 			Vector3 gunRecoil = new Vector3(Random.Range(-m_recoilKickBack.x, m_recoilKickBack.x), m_recoilKickBack.y, m_recoilKickBack.z);
 			transform.localPosition = Vector3.Lerp(transform.localPosition, transform.localPosition + gunRecoil, m_recoilAmount);
 
-			m_horizonCamRecoil.transform.localRotation = Quaternion.Slerp(m_horizonCamRecoil.transform.localRotation, Quaternion.Euler(m_horizonCamRecoil.transform.localEulerAngles + HorizonCamRecoil), m_recoilAmount);
+			m_horizonCamRecoil.transform.localRotation = Quaternion.Slerp(m_horizonCamRecoil.transform.localRotation,
+			Quaternion.Euler(m_horizonCamRecoil.transform.localEulerAngles + HorizonCamRecoil), m_recoilAmount);
+			
 			m_cameraRotate.VerticalCamRotate(-VerticalCamRecoil.x); //현재 이걸로 수직반동 올리는 중임.
 		}
 		else
@@ -303,7 +304,9 @@ public class Weapon_AKM : Weapon
 			Vector3 gunRecoil = new Vector3(Random.Range(-m_recoilKickBack.x, m_recoilKickBack.x) / 2f, 0, m_recoilKickBack.z);
 			transform.localPosition = Vector3.Lerp(transform.localPosition, transform.localPosition + gunRecoil, m_recoilAmount);
 
-			m_horizonCamRecoil.transform.localRotation = Quaternion.Slerp(m_horizonCamRecoil.transform.localRotation, Quaternion.Euler(m_horizonCamRecoil.transform.localEulerAngles + HorizonCamRecoil / 1.5f), m_recoilAmount);
+			m_horizonCamRecoil.transform.localRotation = Quaternion.Slerp(m_horizonCamRecoil.transform.localRotation,
+			Quaternion.Euler(m_horizonCamRecoil.transform.localEulerAngles + HorizonCamRecoil / 1.5f), m_recoilAmount);
+			
 			m_cameraRotate.VerticalCamRotate(-VerticalCamRecoil.x / 2f); //현재 이걸로 수직반동 올리는 중임.
 		}
 	}
@@ -333,32 +336,32 @@ public class Weapon_AKM : Weapon
 	}
 
 	public override void JumpAccuracy(bool j)
-    {
+    	{
 		if(j)
-        {
+        	{
 			m_accuracy = m_accuracy * 5f;
-        }
+        	}
 		else
-        {
+        	{
 			if(m_isAiming)
-            {
+            		{
 				m_accuracy = m_originAccuracy / 4f;
-            }
+            		}
 			else
-            {
+            		{
 				m_accuracy = m_originAccuracy;
-            }
-        }
-    }
+            		}
+        	}
+    	}
 
 	public override void CrouchAccuracy(bool c)
-    {
+    	{
 		if (c)
-        {
+        	{
 			m_accuracy = m_accuracy / 2f;
-        }
+        	}
 		else
-        {
+        	{
 			if (m_isAiming)
 			{
 				m_accuracy = m_originAccuracy / 4f;
@@ -368,7 +371,7 @@ public class Weapon_AKM : Weapon
 				m_accuracy = m_originAccuracy;
 			}
 		}
-    }
+    	}
 }
     #endregion
 ```
@@ -395,7 +398,6 @@ public Weapon m_currentWeapon; //현재 무기
     }
 ...
 ```
-
 </div>
 </details>
 
