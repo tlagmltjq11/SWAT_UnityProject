@@ -13,7 +13,7 @@ Irrational Games에서 개발한 택티컬 슈팅 게임 SWAT4를 모작한 프�
 
 ### About Dev.:nut_and_bolt: <div id="2"></div>
 <details>
-<summary>무기관련 Class 접기/펼치기</summary>
+<summary>무기관련 Code 접기/펼치기</summary>
 <div markdown="1">
 
 <br>
@@ -23,7 +23,6 @@ Irrational Games에서 개발한 택티컬 슈팅 게임 SWAT4를 모작한 프�
 <div markdown="1">
 	
 ```c#
-//추상클래스 Weapon
 public abstract class Weapon : MonoBehaviour
 {
     	#region Field
@@ -105,7 +104,6 @@ public abstract class Weapon : MonoBehaviour
 <div markdown="1">
 	
 ```c#
-//AKM 
 public class Weapon_AKM : Weapon
 {
 	#region Abstract Methods Implement
@@ -617,6 +615,510 @@ public ATW m_currentATW; //현재 투척무기
     }
 ...
 ```
+
+<details>
+<summary>FSM Code 접기/펼치기</summary>
+<div markdown="1">
+</div>
+</details>
+
+<br>
+
+<summary>적 FSM 접기/펼치기</summary>
+<div markdown="1">
+</div>
+</details>
+
+<summary>FSM Class 접기/펼치기</summary>
+<div markdown="1">
+</div>
+</details>
+
+```c#
+public class FSM <T>  : MonoBehaviour
+{
+	private T owner;
+	private IFSMState<T> currentState = null;
+	private IFSMState<T> previousState = null;
+
+	public IFSMState<T> CurrentState{ get {return currentState;} }
+	public IFSMState<T> PreviousState{ get {return previousState;} }
+
+	//	초기 상태 설정..
+	protected void InitState(T owner, IFSMState<T> initialState)
+	{
+		this.owner = owner;
+		ChangeState(initialState);
+	}
+
+	//	각 상태의 Idle 처리..
+	protected void  FSMUpdate() 
+	{ 
+		if (currentState != null) currentState.Execute(owner);
+	}
+
+	//	상태 변경..
+	public void  ChangeState(IFSMState<T> newState)
+	{
+		previousState = currentState;
+ 
+		if (currentState != null)
+			currentState.Exit(owner);
+ 
+		currentState = newState;
+ 
+		if (currentState != null)
+			currentState.Enter(owner);
+	}
+
+	//	이전 상태로 전환..
+	public void  RevertState()
+	{
+		if (previousState != null)
+			ChangeState(previousState);
+	}
+
+	public override string ToString() 
+	{ 
+		return currentState.ToString(); 
+	}
+}
+```
+
+</div>
+</details>
+
+<summary>IFSM Interface 접기/펼치기</summary>
+<div markdown="1">
+</div>
+</details>
+
+```c#
+public interface IFSMState<T>
+{	
+    //  상태 진입..
+	void Enter(T e);
+
+    //  상태 진행..
+    void Execute(T e);
+
+    //  상태 종료..
+    void Exit(T e);
+
+}
+```
+
+</div>
+</details>
+
+<summary>FSM State Manager 접기/펼치기</summary>
+<div markdown="1">
+</div>
+</details>
+
+```c#
+public class Enemy_StateManager : FSM<Enemy_StateManager>
+{
+    #region Field
+    public Animator m_anim;
+    public GameObject m_player;
+    public NavMeshAgent m_navAgent;
+    public GameObject m_upperBody;
+    public GameObject m_shootPoint;
+    public LineRenderer m_lineRenderer;
+    public AnimatorStateInfo m_info;
+    public ParticleSystem muzzleFlash;
+    public Rigidbody m_bodyRig;
+
+    public float m_idleTime;
+    public float m_dieTime;
+    public float m_detectSight = 30f;
+    public float m_attackSight = 15f;
+    public int m_check;
+    public float m_footstepTimer;
+    public float m_footstepCycle;
+    public float m_hp;
+    public float m_bullets;
+    public int m_footstepTurn = 0;
+
+    public Transform m_wayPointObj;
+    public Transform[] m_wayPoints;
+    public bool m_isStayPos;
+    #endregion
+
+    #region Unity Methods
+    void OnEnable()
+    {
+        Init();
+        RagdollOnOff(true);
+        InitState(this, Enemy_IDLE.Instance);
+    }
+
+    void OnDisable()
+    {
+        RagdollOnOff(true);
+    }
+
+    void Start()
+    {
+        if(m_wayPointObj != null)
+        {
+            m_wayPoints = m_wayPointObj.GetComponentsInChildren<Transform>();
+        }
+    }
+
+    void Update()
+    {
+        m_info = m_anim.GetCurrentAnimatorStateInfo(0);
+
+        FSMUpdate();
+    }
+    #endregion
+
+    #region Private Methods
+    void Init()
+    {
+        m_anim = GetComponent<Animator>();
+        m_navAgent = GetComponent<NavMeshAgent>();
+
+        m_lineRenderer = GetComponent<LineRenderer>();
+        m_lineRenderer.startWidth = 0.01f;
+        m_lineRenderer.endWidth = 0.01f;
+        m_lineRenderer.startColor = Color.white;
+        m_lineRenderer.endColor = Color.white;
+        m_lineRenderer.enabled = false;
+        
+        m_idleTime = 0f;
+        m_dieTime = 0f;
+        m_check = 0;
+        m_hp = 100f;
+        m_bullets = 5f;
+
+        m_player = GameObject.Find("Player");
+        m_anim.Rebind();
+    }
+    #endregion
+
+    #region Public Methods
+    public bool SearchTarget()
+    {
+        var dir = (m_player.transform.position + Vector3.up * 0.4f) - (gameObject.transform.position + Vector3.up * 1.3f);
+
+        m_check = 0;
+
+        RaycastHit m_hit;
+
+        int layerMask = ((1 << LayerMask.NameToLayer("Enemy")) | (1 << LayerMask.NameToLayer("Sfx")) | (1 << LayerMask.NameToLayer("Interactable")));
+        layerMask = ~layerMask;
+        if (Physics.Raycast(gameObject.transform.position + Vector3.up * 1.3f, dir.normalized, out m_hit, m_detectSight, layerMask))
+        {
+            if (m_hit.collider.gameObject.layer == LayerMask.NameToLayer("Player"))
+            {
+                m_check++;
+            }
+        }
+
+        if (m_check == 1)
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+
+    public bool canAttack()
+    {
+        var distance = Vector3.Distance(gameObject.transform.position, m_player.transform.position);
+
+        if (distance <= m_attackSight)
+        {
+            return true;
+        }
+
+        return false;
+    }
+
+    public void Fire()
+    {
+        RaycastHit hit;
+
+        int layerMask = ((1 << LayerMask.NameToLayer("Enemy")) | (1 << LayerMask.NameToLayer("Sfx")) | (1 << LayerMask.NameToLayer("Interactable")) | (1 << LayerMask.NameToLayer("Enemy_ExplosionHitCol")));
+        layerMask = ~layerMask;
+
+        Vector3 dir = new Vector3(m_player.transform.position.x, m_player.transform.position.y + 0.2f, m_player.transform.position.z) - m_shootPoint.transform.position;
+        m_shootPoint.transform.forward = dir.normalized;
+
+        if (Physics.Raycast(m_shootPoint.transform.position, m_shootPoint.transform.forward + Random.onUnitSphere * 0.05f, out hit, 100f, layerMask))
+        {
+            m_lineRenderer.SetPosition(0, m_shootPoint.transform.position);
+            m_lineRenderer.SetPosition(1, hit.point);
+            StartCoroutine(ShowBulletLine());
+
+            if (hit.collider.gameObject.layer == LayerMask.NameToLayer("Player"))
+            {
+                if(hit.collider.gameObject.name.Equals("Player"))
+                {
+                    Player_StateManager player = hit.collider.gameObject.GetComponent<Player_StateManager>();
+
+                    if (player != null)
+                    {
+                        player.Damaged(5f);
+                    }
+                }
+                else if(hit.collider.gameObject.name.Equals("UpperBodyLean"))
+                {
+                    Player_StateManager player = hit.collider.gameObject.GetComponentInParent<Player_StateManager>();
+
+                    if (player != null)
+                    {
+                        player.Damaged(10f);
+                    }
+                }
+            }
+            else
+            {
+                var hitSpark = ObjPool.Instance.m_hitSparkPool.Get();
+
+                if (hitSpark != null)
+                {
+                    hitSpark.gameObject.transform.position = hit.point;
+                    hitSpark.gameObject.transform.rotation = Quaternion.FromToRotation(Vector3.up, hit.normal);
+                    hitSpark.gameObject.SetActive(true);
+                }
+            }
+        }
+
+        SoundManager.Instance.Play3DSound(SoundManager.eAudioClip.M4_SHOOT, gameObject.transform.position, 30f, 0.7f);
+        muzzleFlash.Play();
+        m_bullets--;
+
+        if(m_bullets == 0)
+        {
+            m_anim.SetBool("ISATTACK", false);
+            m_anim.CrossFadeInFixedTime("RELOAD", 0.01f);
+            SoundManager.Instance.Play3DSound(SoundManager.eAudioClip.M4_RELOAD, gameObject.transform.position, 20f, 0.5f);
+            m_bullets = 5f;
+        }
+    }
+
+    public void Damaged(float dmg)
+    {
+        if (m_hp <= 0)
+        {
+            return;
+        }
+
+        if (m_hp - dmg <= 0f)
+        {
+            m_hp = 0f;
+            SoundManager.Instance.Play3DSound(Random.Range((int)SoundManager.eAudioClip.ENEMY_DEATH1, (int)SoundManager.eAudioClip.HITSOUND), gameObject.transform.position, 20f, 1.2f);
+            ChangeState(Enemy_DIE.Instance);
+        }
+        else
+        {
+            m_hp = m_hp - dmg;
+
+            if(canAttack())
+            {
+                ChangeState(Enemy_ATTACK.Instance);
+            }
+            else
+            {
+                ChangeState(Enemy_RUN.Instance);
+            }
+        }
+    }
+
+    public void RagdollOnOff(bool OnOff)
+    {
+        m_anim.enabled = OnOff;
+        Rigidbody[] rigs = gameObject.GetComponentsInChildren<Rigidbody>();
+
+        for (int i = 0; i < rigs.Length; i++)
+        {
+            rigs[i].isKinematic = OnOff;
+        }
+    }
+    #endregion
+
+    #region Coroutine
+    IEnumerator ShowBulletLine()
+    {
+        m_lineRenderer.enabled = true;
+        yield return new WaitForSeconds(0.1f);
+        m_lineRenderer.enabled = false;
+    }
+    #endregion
+}
+```
+
+</div>
+</details>
+
+<summary>FSM State Idle 접기/펼치기</summary>
+<div markdown="1">
+</div>
+</details>
+
+```c#
+public class Enemy_IDLE : FSMSingleton<Enemy_IDLE>, IFSMState<Enemy_StateManager>
+{
+    //  상태 진입..
+    public void Enter(Enemy_StateManager e)
+    {
+        e.m_anim.Rebind();
+        e.m_navAgent.ResetPath();
+    }
+
+    //  상태 진행..
+    public void Execute(Enemy_StateManager e)
+    {
+        e.m_idleTime += Time.deltaTime;
+
+        if (e.m_idleTime >= 1.5f)
+        {
+            if (e.SearchTarget())
+            {
+                if (e.canAttack())
+                {
+                    e.ChangeState(Enemy_ATTACK.Instance);
+                }
+                else if(!e.m_isStayPos)
+                {
+                    e.ChangeState(Enemy_RUN.Instance);
+                }
+            }
+            else if(!e.m_isStayPos)
+            {
+                e.ChangeState(Enemy_PATROL.Instance);
+            }
+        }
+    }
+
+    //  상태 종료..
+    public void Exit(Enemy_StateManager e)
+    {
+        e.m_idleTime = 0f;
+    }
+}
+```
+
+</div>
+</details>
+
+<summary>FSM State Patrol 접기/펼치기</summary>
+<div markdown="1">
+</div>
+</details>
+
+```c#
+public class Enemy_PATROL : FSMSingleton<Enemy_PATROL>, IFSMState<Enemy_StateManager>
+{
+    //  상태 진입..
+    public void Enter(Enemy_StateManager e)
+    {
+        e.m_navAgent.stoppingDistance = 0.5f;
+        e.m_navAgent.speed = 1f;
+        e.m_footstepCycle = 0.8f;
+    }
+
+    //  상태 진행..
+    public void Execute(Enemy_StateManager e)
+    {
+        if (!e.SearchTarget())
+        {
+            if(e.m_isStayPos)
+            {
+                return;
+            }
+
+            if (!e.m_navAgent.hasPath)
+            {
+                if(e.m_wayPointObj != null)
+                {
+                    e.m_anim.SetBool("ISWALK", true);
+                    e.m_navAgent.SetDestination(e.m_wayPoints[Random.Range(1, e.m_wayPoints.Length)].position);
+                }
+                else
+                {
+                    //랜덤 패트롤링
+                    NavMeshHit hit;
+                    Vector3 finalPosition = Vector3.zero;
+                    Vector3 randomDirection = Random.insideUnitSphere * 5f;
+                    randomDirection.y = 0f;
+                    randomDirection += e.gameObject.transform.position;
+
+                    //randomDirection위치에 navMesh가 존재하여 갈 수 있는지 체크
+                    if (NavMesh.SamplePosition(randomDirection, out hit, 1f, 1))
+                    {
+                        finalPosition = hit.position;
+                    }
+
+                    e.m_anim.SetBool("ISWALK", true);
+                    e.m_navAgent.SetDestination(finalPosition);
+                }
+            }
+            else
+            {
+                #region Footstep
+                e.m_footstepTimer += Time.deltaTime;
+
+                if (e.m_footstepTimer > e.m_footstepCycle)
+                {
+                    if (e.m_footstepTurn == 0)
+                    {
+                        SoundManager.Instance.Play3DSound(SoundManager.eAudioClip.FOOTSTEP3, e.gameObject.transform.position, 8f, 1f);
+                        e.m_footstepTurn = 1;
+                    }
+                    else if (e.m_footstepTurn == 1)
+                    {
+                        SoundManager.Instance.Play3DSound(SoundManager.eAudioClip.FOOTSTEP4, e.gameObject.transform.position, 8f, 1f);
+                        e.m_footstepTurn = 0;
+                    }
+
+                    e.m_footstepTimer = 0f;
+                }
+                #endregion
+
+                if (e.m_navAgent.remainingDistance <= e.m_navAgent.stoppingDistance)
+                {
+                    e.m_navAgent.ResetPath();
+                    e.ChangeState(Enemy_IDLE.Instance);
+                }
+            }
+        }
+        else
+        {
+            e.ChangeState(Enemy_IDLE.Instance);
+        }
+    }
+
+    //  상태 종료..
+    public void Exit(Enemy_StateManager e)
+    {
+        e.m_navAgent.ResetPath();
+        e.m_anim.SetBool("ISWALK", false);
+        e.m_footstepCycle = 0f;
+    }
+}
+```
+
+</div>
+</details>
+
+
+</div>
+</details>
+
+<summary>인질 FSM 접기/펼치기</summary>
+<div markdown="1">
+</div>
+</details>
+
+</div>
+</details>
 
 </div>
 </details>
