@@ -310,8 +310,11 @@ public class Weapon_AKM : Weapon
 		}
 		else
 		{
-			Vector3 gunRecoil = new Vector3(Random.Range(-m_recoilKickBack.x, m_recoilKickBack.x) / 2f, 0, m_recoilKickBack.z);
-			transform.localPosition = Vector3.Lerp(transform.localPosition, transform.localPosition + gunRecoil, m_recoilAmount);
+			Vector3 gunRecoil = new Vector3(Random.Range(-m_recoilKickBack.x, m_recoilKickBack.x) / 2f, 0, 
+			                                 m_recoilKickBack.z);
+							 
+			transform.localPosition = Vector3.Lerp(transform.localPosition, transform.localPosition + gunRecoil, 
+			                                        m_recoilAmount);
 
 			m_horizonCamRecoil.transform.localRotation = Quaternion.Slerp(m_horizonCamRecoil.transform.localRotation,
 			Quaternion.Euler(m_horizonCamRecoil.transform.localEulerAngles + HorizonCamRecoil / 1.5f), m_recoilAmount);
@@ -328,7 +331,9 @@ public class Weapon_AKM : Weapon
 
 	public override void CasingEffect()
 	{
-		Quaternion randomQuaternion = new Quaternion(Random.Range(0f, 360f), Random.Range(0f, 360f), Random.Range(0f, 360f), 1);
+		Quaternion randomQuaternion = new Quaternion(Random.Range(0f, 360f), Random.Range(0f, 360f), 
+		                                              Random.Range(0f, 360f), 1);
+							      
 		var casing = ObjPool.Instance.m_casingPool.Get();
 
 		if (casing != null)
@@ -340,9 +345,9 @@ public class Weapon_AKM : Weapon
 
 			casing.gameObject.GetComponent<Rigidbody>().isKinematic = false;
 			casing.gameObject.SetActive(true);
-			casing.gameObject.GetComponent<Rigidbody>().AddRelativeForce(new Vector3(Random.Range(50f, 100f), 
-			                                                             Random.Range(50f, 100f), Random.Range(-10f, 20f)));
-										     
+			casing.gameObject.GetComponent<Rigidbody>().AddRelativeForce(
+				new Vector3(Random.Range(50f, 100f), Random.Range(50f, 100f), Random.Range(-10f, 20f)));
+			                                                             						     
 			casing.gameObject.GetComponent<Rigidbody>().MoveRotation(randomQuaternion.normalized);
 		}
 	}
