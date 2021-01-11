@@ -1105,6 +1105,161 @@ public class Enemy_PATROL : FSMSingleton<Enemy_PATROL>, IFSMState<Enemy_StateMan
 </div>
 </details>
 
+<details>
+<summary>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;FSM State Attack 접기/펼치기</summary>
+<div markdown="1">
+
+```c#
+public class Enemy_ATTACK : FSMSingleton<Enemy_ATTACK>, IFSMState<Enemy_StateManager>
+{
+    //  상태 진입..
+    public void Enter(Enemy_StateManager e)
+    {
+    
+    }
+
+    //  상태 진행..
+    public void Execute(Enemy_StateManager e)
+    {
+        if(e.SearchTarget())
+        {
+            Vector3 dir = e.m_player.transform.position - e.gameObject.transform.position;
+            e.gameObject.transform.forward = Vector3.Lerp(e.gameObject.transform.forward, new Vector3(dir.x, 0f, dir.z), Time.deltaTime * 3f);
+
+            if (!e.m_info.IsName("RELOAD"))
+            {
+                if (e.canAttack())
+                {
+                    e.m_anim.SetBool("ISATTACK", true);
+                }
+                else
+                {
+                    e.m_idleTime = 1f;//빠르게 재추적하도록 유도.
+                    e.ChangeState(Enemy_IDLE.Instance);
+                }
+            }
+        }
+        else
+        {
+            e.ChangeState(Enemy_IDLE.Instance);
+        }
+    }
+
+    //  상태 종료..
+    public void Exit(Enemy_StateManager e)
+    {
+        e.m_anim.SetBool("ISATTACK", false);
+    }
+}
+```
+
+</div>
+</details>
+
+<details>
+<summary>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;FSM State Run 접기/펼치기</summary>
+<div markdown="1">
+
+```c#
+public class Enemy_RUN : FSMSingleton<Enemy_RUN>, IFSMState<Enemy_StateManager>
+{
+    //  상태 진입..
+    public void Enter(Enemy_StateManager e)
+    {
+        e.m_navAgent.speed = 2.5f;
+        e.m_footstepCycle = 0.5f;
+        //e.m_navAgent.stoppingDistance = e.m_attackSight;
+    }
+
+    //  상태 진행..
+    public void Execute(Enemy_StateManager e)
+    {
+        if (e.SearchTarget())
+        {
+            e.m_anim.SetBool("ISRUN", true);
+            e.m_navAgent.SetDestination(e.m_player.transform.position);
+
+            #region Footstep
+            e.m_footstepTimer += Time.deltaTime;
+
+            if (e.m_footstepTimer > e.m_footstepCycle)
+            {
+                if (e.m_footstepTurn == 0)
+                {
+                    SoundManager.Instance.Play3DSound(SoundManager.eAudioClip.FOOTSTEP3, e.gameObject.transform.position, 20f, 1f);
+                    e.m_footstepTurn = 1;
+                }
+                else if (e.m_footstepTurn == 1)
+                {
+                    SoundManager.Instance.Play3DSound(SoundManager.eAudioClip.FOOTSTEP4, e.gameObject.transform.position, 20f, 1f);
+                    e.m_footstepTurn = 0;
+                }
+
+                e.m_footstepTimer = 0f;
+            }
+            #endregion
+
+            if (e.canAttack())
+            {
+                e.ChangeState(Enemy_IDLE.Instance);
+            }
+        }
+        else
+        {
+            e.ChangeState(Enemy_IDLE.Instance);
+        }
+    }
+
+    //  상태 종료..
+    public void Exit(Enemy_StateManager e)
+    {
+        e.m_navAgent.ResetPath();
+        e.m_anim.SetBool("ISRUN", false);
+        e.m_footstepCycle = 0f;
+        e.m_idleTime = 1.5f; //대기시간없이 바로 attack 상태로 전이되게끔 유도.
+    }
+}
+```
+
+</div>
+</details>
+
+<details>
+<summary>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;FSM State Die 접기/펼치기</summary>
+<div markdown="1">
+
+```c#
+public class Enemy_DIE : FSMSingleton<Enemy_DIE>, IFSMState<Enemy_StateManager>
+{
+    //  상태 진입..
+    public void Enter(Enemy_StateManager e)
+    {
+        e.RagdollOnOff(false);
+        GameManager.Instance.AddScore(50);
+    }
+
+    //  상태 진행..
+    public void Execute(Enemy_StateManager e)
+    {
+        e.m_dieTime += Time.deltaTime;
+
+        if(e.m_dieTime >= 5f)
+        {
+            e.gameObject.SetActive(false);
+        }
+    }
+
+    //  상태 종료..
+    public void Exit(Enemy_StateManager e)
+    {
+        
+    }
+}
+```
+
+</div>
+</details>
+
 </div>
 </details>
 
