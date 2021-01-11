@@ -16,6 +16,7 @@ Irrational Games에서 개발한 택티컬 슈팅 게임 SWAT4를 모작한 프�
 <summary>총기와 투척무기 Class 접기/펼치기</summary>
 <div markdown="1">
 
+
 <details>
 <summary>Weapon code 접기/펼치기</summary>
 <div markdown="1">
@@ -75,6 +76,7 @@ public abstract class Weapon : MonoBehaviour
 	public bool m_isFiring;
 	public float m_fireTimer;
     	#endregion
+	
     #endregion
 
     	#region Abstract Methods
@@ -124,10 +126,13 @@ public class Weapon_AKM : Weapon
 		RaycastHit hit;
 
 		int layerMask = ((1 << LayerMask.NameToLayer("Player")) | (1 << LayerMask.NameToLayer("Sfx")) | 
-		(1 << LayerMask.NameToLayer("Interactable")) | (1 << LayerMask.NameToLayer("Player_Throw")) | (1 << LayerMask.NameToLayer("Enemy_ExplosionHitCol")));
+		(1 << LayerMask.NameToLayer("Interactable")) | (1 << LayerMask.NameToLayer("Player_Throw")) | 
+		(1 << LayerMask.NameToLayer("Enemy_ExplosionHitCol")));
+		
 		layerMask = ~layerMask;
 		
-		if (Physics.Raycast(m_shootPoint.position, m_shootPoint.transform.forward + Random.onUnitSphere * m_accuracy, out hit, m_range, layerMask))
+		if (Physics.Raycast(m_shootPoint.position, m_shootPoint.transform.forward + Random.onUnitSphere * m_accuracy,
+		    out hit, m_range, layerMask))
 		{
 			if (hit.collider.gameObject.layer == LayerMask.NameToLayer("Enemy"))
 			{
@@ -164,7 +169,8 @@ public class Weapon_AKM : Weapon
 				{
 					hitHole.gameObject.transform.position = hit.point;
 					hitHole.gameObject.transform.rotation = Quaternion.FromToRotation(Vector3.up, hit.normal);
-					hitHole.transform.SetParent(hit.transform); // 탄흔이 오브젝트를 따라가게끔 유도하기 위해 리턴되기 전까지만 부모로 지정
+					// 탄흔이 오브젝트를 따라가게끔 유도하기 위해 리턴되기 전까지만 부모로 지정
+					hitHole.transform.SetParent(hit.transform);
 					hitHole.gameObject.SetActive(true);
 				}
 
@@ -291,8 +297,11 @@ public class Weapon_AKM : Weapon
 
 		if (!m_isAiming)
 		{
-			Vector3 gunRecoil = new Vector3(Random.Range(-m_recoilKickBack.x, m_recoilKickBack.x), m_recoilKickBack.y, m_recoilKickBack.z);
-			transform.localPosition = Vector3.Lerp(transform.localPosition, transform.localPosition + gunRecoil, m_recoilAmount);
+			Vector3 gunRecoil = new Vector3(Random.Range(-m_recoilKickBack.x, m_recoilKickBack.x),
+			                                m_recoilKickBack.y, m_recoilKickBack.z);
+							
+			transform.localPosition = Vector3.Lerp(transform.localPosition, 
+			                                       transform.localPosition + gunRecoil, m_recoilAmount);
 
 			m_horizonCamRecoil.transform.localRotation = Quaternion.Slerp(m_horizonCamRecoil.transform.localRotation,
 			Quaternion.Euler(m_horizonCamRecoil.transform.localEulerAngles + HorizonCamRecoil), m_recoilAmount);
@@ -313,7 +322,8 @@ public class Weapon_AKM : Weapon
 
 	public override void RecoilBack()
 	{
-		m_horizonCamRecoil.transform.localRotation = Quaternion.Slerp(m_horizonCamRecoil.transform.localRotation, Quaternion.Euler(0f, 0f, 0f), Time.deltaTime * 3f);
+		m_horizonCamRecoil.transform.localRotation = Quaternion.Slerp(m_horizonCamRecoil.transform.localRotation, 
+		                                                              Quaternion.Euler(0f, 0f, 0f), Time.deltaTime * 3f);
 	}
 
 	public override void CasingEffect()
@@ -330,7 +340,9 @@ public class Weapon_AKM : Weapon
 
 			casing.gameObject.GetComponent<Rigidbody>().isKinematic = false;
 			casing.gameObject.SetActive(true);
-			casing.gameObject.GetComponent<Rigidbody>().AddRelativeForce(new Vector3(Random.Range(50f, 100f), Random.Range(50f, 100f), Random.Range(-10f, 20f)));
+			casing.gameObject.GetComponent<Rigidbody>().AddRelativeForce(new Vector3(Random.Range(50f, 100f), 
+			                                                             Random.Range(50f, 100f), Random.Range(-10f, 20f)));
+										     
 			casing.gameObject.GetComponent<Rigidbody>().MoveRotation(randomQuaternion.normalized);
 		}
 	}
