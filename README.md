@@ -30,7 +30,7 @@ public abstract class Weapon : MonoBehaviour
     
     	#region References
     	// References
-    	public Transform m_shootPoint;
+    	public Transform m_shootPoint; //레이(총알) 발사 지점
 	public Animator m_anim;
 	public ParticleSystem muzzleFlash; //총기화염
 	public GameObject m_player;
@@ -46,14 +46,14 @@ public abstract class Weapon : MonoBehaviour
 	#region Weapon info
 	// Weapon Specification
 	public string m_weaponName;
-	public int m_bulletsPerMag;
-	public int m_bulletsRemain;
-	public int m_totalMag;
-	public int m_currentBullets;
+	public int m_bulletsPerMag; //탄창 당 탄약
+	public int m_bulletsRemain; //남은 전체 탄약
+	public int m_totalMag; //총 탄창
+	public int m_currentBullets; //현재 탄약
 	public float m_range; //사정거리
 	public float m_fireRate; //연사력
 	public float m_accuracy; //현재 정확도
-	public float m_power;
+	public float m_power; //데미지
 	public float m_originAccuracy; //원래 정확도
 	
 	// 현재 장착한 sight 파츠에 따라 정조준의 최종 포지션이 다름.
@@ -109,7 +109,7 @@ public abstract class Weapon : MonoBehaviour
 public class Weapon_AKM : Weapon
 {
 	#region Abstract Methods Implement
-    	public override void Fire()
+    	public override void Fire() //총 발사
 	{
 		if (m_fireTimer < m_fireRate) //연사력을 시간으로 구현
 		{
@@ -144,10 +144,10 @@ public class Weapon_AKM : Weapon
 
 				if (blood != null)
 				{
-					blood.gameObject.transform.position = hit.point;
+					blood.gameObject.transform.position = hit.point; //hit 포인트로 이동
 					//법선벡터를 이용해서 잘보이게 회전시킴.
 					blood.gameObject.transform.rotation = Quaternion.FromToRotation(Vector3.up, hit.normal);
-					blood.gameObject.SetActive(true);
+					blood.gameObject.SetActive(true); //활성화 시켜서 재생시킨다.
 				}
 
 				//총을 맞은 적
@@ -158,11 +158,13 @@ public class Weapon_AKM : Weapon
 					//compareTag를 이용!
 					if (hit.collider.gameObject.CompareTag("HeadShot")) //헤드샷 판별
 					{
+						//헤드샷 사운드 재생
 						SoundManager.Instance.Play2DSound(SoundManager.eAudioClip.HEADSHOT, 1.5f);
-						enemy.Damaged(m_power * 100f);
+						enemy.Damaged(m_power * 100f); //바로 죽이기 위해 x 100
 					}
 					else
 					{
+						//Hit 사운드 재생
 						SoundManager.Instance.Play2DSound(SoundManager.eAudioClip.HITSOUND, 1.5f);
 						enemy.Damaged(m_power);
 					}
@@ -175,19 +177,21 @@ public class Weapon_AKM : Weapon
 				if (hitHole != null)
 				{
 					hitHole.gameObject.transform.position = hit.point;
+					//법선벡터를 이용해서 잘보이게 회전시킴.
 					hitHole.gameObject.transform.rotation = Quaternion.FromToRotation(Vector3.up, hit.normal);
 					// 탄흔이 오브젝트를 따라가게끔 유도하기 위해 리턴되기 전까지만 부모로 지정
 					hitHole.transform.SetParent(hit.transform);
 					hitHole.gameObject.SetActive(true);
 				}
 
-				var hitSpark = ObjPool.Instance.m_hitSparkPool.Get();
+				var hitSpark = ObjPool.Instance.m_hitSparkPool.Get(); //사격으로 인한 스파크이펙트를 풀에서 꺼냄.
 
 				if (hitSpark != null)
 				{
 					hitSpark.gameObject.transform.position = hit.point;
+					//법선벡터를 이용해서 잘보이게 회전시킴.
 					hitSpark.gameObject.transform.rotation = Quaternion.FromToRotation(Vector3.up, hit.normal);
-					hitSpark.gameObject.SetActive(true);
+					hitSpark.gameObject.SetActive(true); //활성화시켜 재생시킴.
 				}
 				
 				//Movalble은 리지드바디를 가진 오브젝트들의 레이어임.
@@ -204,8 +208,8 @@ public class Weapon_AKM : Weapon
 			}
 		}
 
-		m_currentBullets--;
-		m_fireTimer = 0.0f;
+		m_currentBullets--; //탄약 --
+		m_fireTimer = 0.0f; 
 		m_anim.CrossFadeInFixedTime("FIRE", 0.01f); //애니메이션을 즉시 FIRE로 바꿔줌.
 
 		muzzleFlash.Play(); //총기화염 play
@@ -219,15 +223,16 @@ public class Weapon_AKM : Weapon
 		m_recoiltHoriz = 0.65f;
 	}
 
-	public override void Reload()
+	public override void Reload() //재장전
 	{
-		if (m_currentBullets == m_bulletsPerMag || m_bulletsRemain == 0)
+		if (m_currentBullets == m_bulletsPerMag || m_bulletsRemain == 0) //탄창이 꽉차있거나, 남은 탄약이 없다면 return
 		{
 			return;
 		}
 
 		SoundManager.Instance.Play2DSound_Play((int)SoundManager.eAudioClip.AKM_RELOAD, 1f);
 		m_anim.CrossFadeInFixedTime("RELOAD", 0.01f); //애니메이션을 즉시 RELOAD로 바꿔줌.
+		//-> UI와 실제 남은 탄약을 바꿔주는 부분은 애니메이션 Event로 ReloadComplete() 메소드를 호출시켜줌.
 	}
 
 	public override void AimIn() //정조준
@@ -244,7 +249,7 @@ public class Weapon_AKM : Weapon
 		SoundManager.Instance.Play2DSound(SoundManager.eAudioClip.AIM_IN, 3.5f);
 	}
 
-	public override void AimOut()
+	public override void AimOut() //정조준 해제
 	{
 		m_isAiming = false;
 		m_anim.SetBool("ISAIM", false);
@@ -265,11 +270,11 @@ public class Weapon_AKM : Weapon
 
 		if (UIManager.Instance != null)
 		{
-			UIManager.Instance.CrossHairOnOff(true);
+			UIManager.Instance.CrossHairOnOff(true); //크로스헤어 활성화
 		}
 	}
 
-    	public override void ChangeSight() //
+    	public override void ChangeSight() //sight 파츠를 변경.
     	{
 		bool check = false;
 		int index = 0;
@@ -360,13 +365,15 @@ public class Weapon_AKM : Weapon
 			casing.transform.localScale = new Vector3(25, 25, 25);
 			casing.transform.localRotation = Quaternion.identity;
 
-			casing.gameObject.GetComponent<Rigidbody>().isKinematic = false;
+			var rigid = casing.gameObject.GetComponent<Rigidbody>();
+			
+			rigid.isKinematic = false; //물리힘을 가하기 위해.
 			casing.gameObject.SetActive(true);
 			//매번 랜덤한 힘을 가해준다.
-			casing.gameObject.GetComponent<Rigidbody>().AddRelativeForce(
+			rigid.AddRelativeForce(
 				new Vector3(Random.Range(50f, 100f), Random.Range(50f, 100f), Random.Range(-10f, 20f)));
 			                                                             						     
-			casing.gameObject.GetComponent<Rigidbody>().MoveRotation(randomQuaternion.normalized);
+			rigid.MoveRotation(randomQuaternion.normalized);
 		}
 	}
 
@@ -430,19 +437,19 @@ public abstract class ATW : MonoBehaviour //Ahead Thrown Weapon 투척무기
     public int m_remainNum; //남은 갯수
     public float m_timeToOper; //동작하기까지 걸리는 시간
     public string m_name;
-    public float m_power;
+    public float m_power; //데미지
     public float m_explosionRadius; //폭발범위
     #endregion
 
     #region Public Methods
-    public void Starter()
+    public void Starter() //스타터
     {
         Invoke("Operation", m_timeToOper);
     }
     #endregion
 
     #region Abstract Methods
-    public abstract void Operation(); //동작
+    public abstract void Operation(); //실제 동작
     #endregion
 }
 ```
@@ -461,24 +468,25 @@ public class ATW_Grenade : ATW
     void Start()
     {
         m_rigid = GetComponent<Rigidbody>();
-        m_remainNum = 2;
-        m_timeToOper = 3f;
+        m_remainNum = 2; //디폴트갯수 2개
+        m_timeToOper = 3f; //3초뒤 폭발
         m_name = "Grenade";
         m_power = 6.5f;
-        m_explosionRadius = 5f;
+        m_explosionRadius = 5f; //폭발 범위 반지름
     }
 
     private void OnCollisionEnter(Collision collision)
     {
-        if(collision.gameObject.layer.Equals(LayerMask.NameToLayer("Ground")))
-        {
+        if(collision.gameObject.layer.Equals(LayerMask.NameToLayer("Ground"))) //땅이나 벽에 부딪힐 경우
+        {	
+	    //ImpactGround 클립 재생
             SoundManager.Instance.Play3DSound(SoundManager.eAudioClip.ATW_IMPACTONTGROUND, gameObject.transform.position, 20f, 1.5f);
         }
     }
     #endregion
 
     #region Abstract Methods Implement
-    public override void Operation()
+    public override void Operation() //실제 동작
     {
         //파티클시스템을 작동시키기 위해서, 수류탄의 몸체를 정지시킨 후 똑바로 세워놓음.
         m_rigid.velocity = Vector3.zero;
@@ -500,6 +508,7 @@ public class ATW_Grenade : ATW
         RaycastHit[] hits = Physics.SphereCastAll(gameObject.transform.position, m_explosionRadius, Vector3.up, 0, layerMask,
 						   QueryTriggerInteraction.UseGlobal);
 
+	//모든 hit 검사
         foreach(RaycastHit hit in hits)
         {
             //수류탄과의 거리별 데미지를 계산한다.
@@ -516,18 +525,20 @@ public class ATW_Grenade : ATW
             {
                 //적군과 수류탄사이에 장애물이 가로막고있는지 Raycast로 판별 후, 가로막혀있다면 데미지를 주지않는다.
                 RaycastHit check;
+		//방향
                 var dir = hit.transform.position - gameObject.transform.position;
                 int layer = (1 << LayerMask.NameToLayer("Ground")) | (1 << LayerMask.NameToLayer("Interactable")) |
 		              (1 << LayerMask.NameToLayer("Movable"));
 			      
+		//적과 수류탄사이에 다른 무엇인가 존재한다면 장애물로 판단하고 데미지를 주지 않은채 다음 hit 검사로 넘어간다. 
                 if(Physics.Raycast(gameObject.transform.position, dir.normalized, out check, m_explosionRadius, layer))
                 {
                     continue;
                 }
 
-                var enemy = hit.transform.GetComponentInParent<Enemy_StateManager>();
+                var enemy = hit.transform.GetComponentInParent<Enemy_StateManager>(); //데미지를 주기위해 적 FSM매니저를 가져옴.
 
-                //사이에 장애물이 없다면, 거리별 데미지를 준다.
+                //사이에 장애물이 없으므로 거리별 데미지를 준다.
                 enemy.Damaged(100 * (m_power / distance));
 
                 if (enemy.m_hp <= 0) //대상이 죽은 상태라면
@@ -546,17 +557,19 @@ public class ATW_Grenade : ATW
             else if(hit.transform.gameObject.layer.Equals(LayerMask.NameToLayer("Movable")))
             {
                 Crash_Box cb = hit.transform.gameObject.GetComponent<Crash_Box>();
-                cb.Crash();
+                cb.Crash(); //박스가 여러 조각의 오브젝트들로 대체되는 메소드 -> 부서지는 현상을 보여주는것
 
                 var rigs = hit.transform.GetComponentsInChildren<Rigidbody>();
 
                 foreach (Rigidbody rig in rigs)
                 {
+		    //각 박스조각 오브젝트들에게 물리힘을 가해 날려준다.
                     rig.AddExplosionForce(100 * (m_power / distance), gameObject.transform.position, m_explosionRadius, 5f);
                 }
             }
         }
 	
+	//2초뒤 삭제
         Destroy(gameObject, 2f);
     }
     #endregion
@@ -568,7 +581,7 @@ public class ATW_Grenade : ATW
 
 <br>
 
-**Explanation**<br>
+**Explanation**(구현설명은 주석으로 간단하게 처리했습니다!)<br> 
 공통된 내용(필드나 메소드)들을 추출하여 통일된 내용으로 작성하도록 상위 클래스인 Weapon, ATW 추상클래스를 구현했습니다. 모든 총기 및 투척무기 클래스는 해당 추상클래스를 상속받아, 
 각자 필요한 메소드나 필드만 추가로 정의하고, 추상 메소드를 오버라이딩하여 클래스마다 다르게 실행될 로직을 작성해 주면 됩니다. 이러한 구성을 통해서, 코드들을 규격화 할 수 있었고 
 아래와 같이 다형성 사용, 느슨한 결합 등을 이룰 수 있었습니다.
