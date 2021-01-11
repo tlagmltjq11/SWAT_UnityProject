@@ -626,7 +626,7 @@ public ATW m_currentATW; //현재 투척무기
 <br>	
 	
 <details>
-<summary>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;적 FSM 접기/펼치기</summary>
+<summary>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;적 FSM Code 접기/펼치기</summary>
 <div markdown="1">
 
 <br>
@@ -636,52 +636,61 @@ public ATW m_currentATW; //현재 투척무기
 <div markdown="1">
 
 ```c#
-public class FSM <T>  : MonoBehaviour
+public class FSM <T>  : MonoBehaviour //상태 매니저는 해당 FSM 클래스를 상속받아서 모든 기능들을 이용함.
 {
-	private T owner;
-	private IFSMState<T> currentState = null;
-	private IFSMState<T> previousState = null;
+	private T m_owner; //상태 매니저를 나타냄.
+	private IFSMState<T> m_currentState = null; //현재 상태
+	private IFSMState<T> m_previousState = null; //이전 상태
 
-	public IFSMState<T> CurrentState{ get {return currentState;} }
-	public IFSMState<T> PreviousState{ get {return previousState;} }
+	public IFSMState<T> CurrentState{ get {return m_currentState;} } //현재 상태 프로퍼티
+	public IFSMState<T> PreviousState{ get {return m_previousState;} } //이전 상태 프로퍼티
 
 	//	초기 상태 설정..
 	protected void InitState(T owner, IFSMState<T> initialState)
 	{
-		this.owner = owner;
+		this.m_owner = owner;
 		ChangeState(initialState);
 	}
 
-	//	각 상태의 Idle 처리..
+	//	각 상태의 Execute 처리..
 	protected void  FSMUpdate() 
 	{ 
-		if (currentState != null) currentState.Execute(owner);
+		if (m_currentState != null)
+		{
+			m_currentState.Execute(owner);
+		}
 	}
 
 	//	상태 변경..
 	public void  ChangeState(IFSMState<T> newState)
 	{
-		previousState = currentState;
+		m_previousState = m_currentState;
  
-		if (currentState != null)
-			currentState.Exit(owner);
+		if (m_currentState != null)
+		{
+			m_currentState.Exit(owner); //상태전환 이전에 Exit 호출
+		}
  
-		currentState = newState;
+		m_currentState = newState;
  
-		if (currentState != null)
-			currentState.Enter(owner);
+		if (m_currentState != null)
+		{
+			m_currentState.Enter(owner); //상태전환과 동시에 Enter 호출
+		}
 	}
 
 	//	이전 상태로 전환..
 	public void  RevertState()
 	{
-		if (previousState != null)
-			ChangeState(previousState);
+		if (m_previousState != null)
+		{
+			ChangeState(m_previousState);
+		}
 	}
 
 	public override string ToString() 
 	{ 
-		return currentState.ToString(); 
+		return m_currentState.ToString(); //현재상태 string 반환
 	}
 }
 ```
@@ -694,17 +703,16 @@ public class FSM <T>  : MonoBehaviour
 <div markdown="1">
 
 ```c#
-public interface IFSMState<T>
+public interface IFSMState<T> //각 상태들이 포함해야할 메소드를 정의한 인터페이스
 {	
     //  상태 진입..
-	void Enter(T e);
+    void Enter(T e);
 
     //  상태 진행..
     void Execute(T e);
 
     //  상태 종료..
     void Exit(T e);
-
 }
 ```
 
@@ -716,41 +724,40 @@ public interface IFSMState<T>
 <div markdown="1">
 
 ```c#
-public class Enemy_StateManager : FSM<Enemy_StateManager>
+public class Enemy_StateManager : FSM<Enemy_StateManager> //상태매니저
 {
     #region Field
     public Animator m_anim;
-    public GameObject m_player;
+    public GameObject m_player; //플레이어
     public NavMeshAgent m_navAgent;
-    public GameObject m_upperBody;
-    public GameObject m_shootPoint;
-    public LineRenderer m_lineRenderer;
-    public AnimatorStateInfo m_info;
-    public ParticleSystem muzzleFlash;
+    public GameObject m_shootPoint; //레이(총알) 발사 위치
+    public LineRenderer m_lineRenderer; //총알의 발사 경로를 그려줄 라인렌더러
+    public AnimatorStateInfo m_info; //애니메이터 상태 정보
+    public ParticleSystem muzzleFlash; //총구화염 이펙트
     public Rigidbody m_bodyRig;
 
-    public float m_idleTime;
-    public float m_dieTime;
-    public float m_detectSight = 30f;
-    public float m_attackSight = 15f;
-    public int m_check;
-    public float m_footstepTimer;
-    public float m_footstepCycle;
-    public float m_hp;
-    public float m_bullets;
-    public int m_footstepTurn = 0;
+    public float m_idleTime; //Idle 필수 지속시간
+    public float m_dieTime; //적이 죽고 난 후 5초 뒤 비활성화해주기 위한 변수
+    public float m_detectSight = 30f; //플레이어 감지거리
+    public float m_attackSight = 15f; //공격가능거리
+    public int m_check; //플레이어를 발견했는지 검사.
+    public float m_footstepTimer; //발소리 m_footstepCycle 마다 발소리를 재생시키기 위해 시간초를 카운팅하는 변수.
+    public float m_footstepCycle; //발소리 재생 간격
+    public float m_hp; //체력
+    public float m_bullets; //탄약
+    public int m_footstepTurn = 0; //왼쪽 발소리, 오른쪽 발소리 차례대로 한번씩 재생시키기 위한 변수.
 
-    public Transform m_wayPointObj;
-    public Transform[] m_wayPoints;
-    public bool m_isStayPos;
+    public Transform m_wayPointObj; //웨이포인트를 자식으로 갖고있는 상위오브젝트
+    public Transform[] m_wayPoints; //웨이포인트들.
+    public bool m_isStayPos; //True라면 현재 포지션을 지키는 AI, False라면 Patrol하는 AI
     #endregion
 
     #region Unity Methods
     void OnEnable()
     {
-        Init();
-        RagdollOnOff(true);
-        InitState(this, Enemy_IDLE.Instance);
+        Init(); //초기화
+        RagdollOnOff(true); //살아있는 상태에는 isKinematic을 true로 해줌. -> false로 할 시 RayCast에 감지되지않는 문제가 생김.
+        InitState(this, Enemy_IDLE.Instance); //상태를 Idle로 초기화
     }
 
     void OnDisable()
@@ -762,24 +769,25 @@ public class Enemy_StateManager : FSM<Enemy_StateManager>
     {
         if(m_wayPointObj != null)
         {
-            m_wayPoints = m_wayPointObj.GetComponentsInChildren<Transform>();
+            m_wayPoints = m_wayPointObj.GetComponentsInChildren<Transform>(); //웨이포인트들을 가져온다.
         }
     }
 
     void Update()
     {
-        m_info = m_anim.GetCurrentAnimatorStateInfo(0);
+        m_info = m_anim.GetCurrentAnimatorStateInfo(0); //현재 동작중인 애니메이션 정보를 받아옴.
 
-        FSMUpdate();
+        FSMUpdate(); //현재 상태의 Execute() 실행
     }
     #endregion
 
     #region Private Methods
-    void Init()
+    void Init() //초기화 메소드
     {
         m_anim = GetComponent<Animator>();
         m_navAgent = GetComponent<NavMeshAgent>();
 
+	//라인렌더러 설정
         m_lineRenderer = GetComponent<LineRenderer>();
         m_lineRenderer.startWidth = 0.01f;
         m_lineRenderer.endWidth = 0.01f;
@@ -799,16 +807,19 @@ public class Enemy_StateManager : FSM<Enemy_StateManager>
     #endregion
 
     #region Public Methods
-    public bool SearchTarget()
+    public bool SearchTarget() //플레이어를 감지하는 메소드
     {
-        var dir = (m_player.transform.position + Vector3.up * 0.4f) - (gameObject.transform.position + Vector3.up * 1.3f);
+        var dir = (m_player.transform.position + Vector3.up * 0.4f) - (gameObject.transform.position + Vector3.up * 1.3f); //눈높이를 맞춰서 방향을 구함.
 
         m_check = 0;
 
         RaycastHit m_hit;
 
-        int layerMask = ((1 << LayerMask.NameToLayer("Enemy")) | (1 << LayerMask.NameToLayer("Sfx")) | (1 << LayerMask.NameToLayer("Interactable")));
-        layerMask = ~layerMask;
+        int layerMask = ((1 << LayerMask.NameToLayer("Enemy")) | (1 << LayerMask.NameToLayer("Sfx")) | 
+									(1 << LayerMask.NameToLayer("Interactable")));
+        layerMask = ~layerMask; //위 레이어들을 제외한 나머지
+	
+	//동일선상 눈높이에서 플레이어의 방향으로 감지거리만큼 Ray를 발사.
         if (Physics.Raycast(gameObject.transform.position + Vector3.up * 1.3f, dir.normalized, out m_hit, m_detectSight, layerMask))
         {
             if (m_hit.collider.gameObject.layer == LayerMask.NameToLayer("Player"))
@@ -819,45 +830,49 @@ public class Enemy_StateManager : FSM<Enemy_StateManager>
 
         if (m_check == 1)
         {
-            return true;
+            return true; //발견
         }
         else
         {
-            return false;
+            return false; //미발견
         }
     }
 
-    public bool canAttack()
+    public bool canAttack() //공격 가능 거리인지 판단
     {
-        var distance = Vector3.Distance(gameObject.transform.position, m_player.transform.position);
+        var distance = Vector3.Distance(gameObject.transform.position, m_player.transform.position); //플레이어와의 거리를 계산
 
-        if (distance <= m_attackSight)
+        if (distance <= m_attackSight) //공격 가능 거리 일 경우
         {
             return true;
         }
 
-        return false;
+        return false; //아닐 경우
     }
 
-    public void Fire()
+    public void Fire() //Ray(총알) 발사
     {
         RaycastHit hit;
 
-        int layerMask = ((1 << LayerMask.NameToLayer("Enemy")) | (1 << LayerMask.NameToLayer("Sfx")) | (1 << LayerMask.NameToLayer("Interactable")) | (1 << LayerMask.NameToLayer("Enemy_ExplosionHitCol")));
-        layerMask = ~layerMask;
+        int layerMask = ((1 << LayerMask.NameToLayer("Enemy")) | (1 << LayerMask.NameToLayer("Sfx")) | 
+				(1 << LayerMask.NameToLayer("Interactable")) | (1 << LayerMask.NameToLayer("Enemy_ExplosionHitCol")));
+				
+        layerMask = ~layerMask; //위 레이어를 제외한 나머지 레이어
 
+	//방향을 구함.
         Vector3 dir = new Vector3(m_player.transform.position.x, m_player.transform.position.y + 0.2f, m_player.transform.position.z) - m_shootPoint.transform.position;
-        m_shootPoint.transform.forward = dir.normalized;
+        m_shootPoint.transform.forward = dir.normalized; //총구의 방향을 플레이어의 위치가있는 방향으로 돌려줌.
 
+	// Random.onUnitSphere를 이용해서 정확도를 분산시켜주며, 총알 발사.
         if (Physics.Raycast(m_shootPoint.transform.position, m_shootPoint.transform.forward + Random.onUnitSphere * 0.05f, out hit, 100f, layerMask))
         {
             m_lineRenderer.SetPosition(0, m_shootPoint.transform.position);
-            m_lineRenderer.SetPosition(1, hit.point);
-            StartCoroutine(ShowBulletLine());
+            m_lineRenderer.SetPosition(1, hit.point); //라인렌더러로 BulletLine을 그려줌.
+            StartCoroutine(ShowBulletLine()); //해당 라인을 몇초간 지속 후 지워주기 위함.
 
-            if (hit.collider.gameObject.layer == LayerMask.NameToLayer("Player"))
+            if (hit.collider.gameObject.layer == LayerMask.NameToLayer("Player")) //플레이어가 맞았을 경우
             {
-                if(hit.collider.gameObject.name.Equals("Player"))
+                if(hit.collider.gameObject.name.Equals("Player")) //몸에 맞았을 경우 5데미지
                 {
                     Player_StateManager player = hit.collider.gameObject.GetComponent<Player_StateManager>();
 
@@ -866,7 +881,7 @@ public class Enemy_StateManager : FSM<Enemy_StateManager>
                         player.Damaged(5f);
                     }
                 }
-                else if(hit.collider.gameObject.name.Equals("UpperBodyLean"))
+                else if(hit.collider.gameObject.name.Equals("UpperBodyLean")) //상체에 맞았을 경우 10데미지
                 {
                     Player_StateManager player = hit.collider.gameObject.GetComponentInParent<Player_StateManager>();
 
@@ -876,63 +891,58 @@ public class Enemy_StateManager : FSM<Enemy_StateManager>
                     }
                 }
             }
-            else
+            else //맞은 대상이 플레이어가 아닐 경우
             {
-                var hitSpark = ObjPool.Instance.m_hitSparkPool.Get();
+                var hitSpark = ObjPool.Instance.m_hitSparkPool.Get(); //총알 스파크이펙트를 풀에서 꺼냄.
 
                 if (hitSpark != null)
                 {
-                    hitSpark.gameObject.transform.position = hit.point;
-                    hitSpark.gameObject.transform.rotation = Quaternion.FromToRotation(Vector3.up, hit.normal);
-                    hitSpark.gameObject.SetActive(true);
+                    hitSpark.gameObject.transform.position = hit.point; //힛 포인트에 위치시킴.
+                    hitSpark.gameObject.transform.rotation = Quaternion.FromToRotation(Vector3.up, hit.normal); //법선벡터를 이용해 잘보이게함.
+                    hitSpark.gameObject.SetActive(true); //파티클시스템 재생
                 }
             }
         }
 
+	//발포음 재생
         SoundManager.Instance.Play3DSound(SoundManager.eAudioClip.M4_SHOOT, gameObject.transform.position, 30f, 0.7f);
-        muzzleFlash.Play();
-        m_bullets--;
+        muzzleFlash.Play(); //총구화염 재생
+        m_bullets--; //탄약--
 
-        if(m_bullets == 0)
+        if(m_bullets == 0) //현재 탄약이 다 떨어지면 재장전
         {
             m_anim.SetBool("ISATTACK", false);
-            m_anim.CrossFadeInFixedTime("RELOAD", 0.01f);
-            SoundManager.Instance.Play3DSound(SoundManager.eAudioClip.M4_RELOAD, gameObject.transform.position, 20f, 0.5f);
-            m_bullets = 5f;
+            m_anim.CrossFadeInFixedTime("RELOAD", 0.01f); //즉시 재장전 애니메이션 작동
+            SoundManager.Instance.Play3DSound(SoundManager.eAudioClip.M4_RELOAD, gameObject.transform.position, 20f, 0.5f); //재장정 클립 재생
+            m_bullets = 5f; 
         }
     }
 
-    public void Damaged(float dmg)
+    public void Damaged(float dmg) //적이 데미지를 입었을 경우
     {
         if (m_hp <= 0)
         {
             return;
         }
 
+	//데미지로인해 죽을 경우
         if (m_hp - dmg <= 0f)
         {
             m_hp = 0f;
-            SoundManager.Instance.Play3DSound(Random.Range((int)SoundManager.eAudioClip.ENEMY_DEATH1, (int)SoundManager.eAudioClip.HITSOUND), gameObject.transform.position, 20f, 1.2f);
-            ChangeState(Enemy_DIE.Instance);
+	    //죽을때 사운드클립을 랜덤하게 선택해 재생.
+            SoundManager.Instance.Play3DSound(Random.Range((int)SoundManager.eAudioClip.ENEMY_DEATH1, (int)SoundManager.eAudioClip.HITSOUND), 
+	    												gameObject.transform.position, 20f, 1.2f);
+            ChangeState(Enemy_DIE.Instance); //현재상태를 Die로 변경.
         }
-        else
+        else 
         {
-            m_hp = m_hp - dmg;
-
-            if(canAttack())
-            {
-                ChangeState(Enemy_ATTACK.Instance);
-            }
-            else
-            {
-                ChangeState(Enemy_RUN.Instance);
-            }
+            m_hp = m_hp - dmg; //데미지만큼 체력 차감.
         }
     }
 
-    public void RagdollOnOff(bool OnOff)
+    public void RagdollOnOff(bool OnOff) //래그돌로인한 Rigidbody들의 isKinematic을 OnOff하는 메소드
     {
-        m_anim.enabled = OnOff;
+        m_anim.enabled = OnOff; //죽을경우 애니메이터도 비활성화 시켜줘야 래그돌로인해 자연스럽게 죽게됨.
         Rigidbody[] rigs = gameObject.GetComponentsInChildren<Rigidbody>();
 
         for (int i = 0; i < rigs.Length; i++)
@@ -946,7 +956,7 @@ public class Enemy_StateManager : FSM<Enemy_StateManager>
     IEnumerator ShowBulletLine()
     {
         m_lineRenderer.enabled = true;
-        yield return new WaitForSeconds(0.1f);
+        yield return new WaitForSeconds(0.1f); //0.1초 후 라인을 지우기 위해 비활성화
         m_lineRenderer.enabled = false;
     }
     #endregion
@@ -961,36 +971,36 @@ public class Enemy_StateManager : FSM<Enemy_StateManager>
 <div markdown="1">
 
 ```c#
-public class Enemy_IDLE : FSMSingleton<Enemy_IDLE>, IFSMState<Enemy_StateManager>
+public class Enemy_IDLE : FSMSingleton<Enemy_IDLE>, IFSMState<Enemy_StateManager> //IDLE상태 클래스 - 싱글턴 및 IFSMState 인터페이스 상속
 {
     //  상태 진입..
     public void Enter(Enemy_StateManager e)
     {
-        e.m_anim.Rebind();
-        e.m_navAgent.ResetPath();
+        e.m_anim.Rebind(); //애니메이터 초기화
+        e.m_navAgent.ResetPath(); //navAgent path 초기화
     }
 
     //  상태 진행..
     public void Execute(Enemy_StateManager e)
     {
-        e.m_idleTime += Time.deltaTime;
+        e.m_idleTime += Time.deltaTime; //IDLE 필수 지속시간을위한 체크
 
-        if (e.m_idleTime >= 1.5f)
+        if (e.m_idleTime >= 1.5f) //필수 지속시간을 넘어섰다면, 상태변경 가능.
         {
-            if (e.SearchTarget())
+            if (e.SearchTarget()) //플레이어를 감지했을 경우
             {
-                if (e.canAttack())
+                if (e.canAttack()) //공격 가능 거리내에 플레이어가 있을 경우
                 {
-                    e.ChangeState(Enemy_ATTACK.Instance);
+                    e.ChangeState(Enemy_ATTACK.Instance); //공격 상태로 변경
                 }
-                else if(!e.m_isStayPos)
+                else if(!e.m_isStayPos) //공격 가능 거리내에 플레이어가 없고, 자리를 지키는 AI가 아니라면
                 {
-                    e.ChangeState(Enemy_RUN.Instance);
+                    e.ChangeState(Enemy_RUN.Instance); //질주 상태로 변경
                 }
             }
-            else if(!e.m_isStayPos)
+            else if(!e.m_isStayPos) //플레이어를 찾지 못했고, 자리를 지키는 AI가 아니라면
             {
-                e.ChangeState(Enemy_PATROL.Instance);
+                e.ChangeState(Enemy_PATROL.Instance); //패트롤로 상태 변경
             }
         }
     }
@@ -998,7 +1008,7 @@ public class Enemy_IDLE : FSMSingleton<Enemy_IDLE>, IFSMState<Enemy_StateManager
     //  상태 종료..
     public void Exit(Enemy_StateManager e)
     {
-        e.m_idleTime = 0f;
+        e.m_idleTime = 0f; //
     }
 }
 ```
@@ -1011,39 +1021,39 @@ public class Enemy_IDLE : FSMSingleton<Enemy_IDLE>, IFSMState<Enemy_StateManager
 <div markdown="1">
 
 ```c#
-public class Enemy_PATROL : FSMSingleton<Enemy_PATROL>, IFSMState<Enemy_StateManager>
+public class Enemy_PATROL : FSMSingleton<Enemy_PATROL>, IFSMState<Enemy_StateManager> //PATROL상태 클래스 - 싱글턴 및 IFSMState 인터페이스 상속
 {
     //  상태 진입..
     public void Enter(Enemy_StateManager e)
     {
         e.m_navAgent.stoppingDistance = 0.5f;
-        e.m_navAgent.speed = 1f;
-        e.m_footstepCycle = 0.8f;
+        e.m_navAgent.speed = 1f; //패트롤 시 속도
+        e.m_footstepCycle = 0.8f; //패트롤 속도에 맞춰 발걸음 재생 간격을 정해줌.
     }
 
     //  상태 진행..
     public void Execute(Enemy_StateManager e)
     {
-        if (!e.SearchTarget())
+        if (!e.SearchTarget()) //플레이어를 감지하지 못했을 경우
         {
             if(e.m_isStayPos)
             {
                 return;
             }
 
-            if (!e.m_navAgent.hasPath)
+            if (!e.m_navAgent.hasPath) //이미 path를 갖고있지 않을 경우
             {
-                if(e.m_wayPointObj != null)
+                if(e.m_wayPointObj != null) //웨이포인트가 정해진 AI일 경우
                 {
-                    e.m_anim.SetBool("ISWALK", true);
+                    e.m_anim.SetBool("ISWALK", true); //걷는 애니메이션 작동
+		    //웨이포인트 순서대로 이동시켜준다.
                     e.m_navAgent.SetDestination(e.m_wayPoints[Random.Range(1, e.m_wayPoints.Length)].position);
                 }
-                else
+                else //랜덤패트롤링 AI일 경우
                 {
-                    //랜덤 패트롤링
                     NavMeshHit hit;
                     Vector3 finalPosition = Vector3.zero;
-                    Vector3 randomDirection = Random.insideUnitSphere * 5f;
+                    Vector3 randomDirection = Random.insideUnitSphere * 5f; //랜덤한 방향
                     randomDirection.y = 0f;
                     randomDirection += e.gameObject.transform.position;
 
@@ -1053,32 +1063,33 @@ public class Enemy_PATROL : FSMSingleton<Enemy_PATROL>, IFSMState<Enemy_StateMan
                         finalPosition = hit.position;
                     }
 
-                    e.m_anim.SetBool("ISWALK", true);
-                    e.m_navAgent.SetDestination(finalPosition);
+                    e.m_anim.SetBool("ISWALK", true); //걷는 애니메이션 작동
+                    e.m_navAgent.SetDestination(finalPosition); //랜덤한 위치로 이동시켜준다.
                 }
             }
-            else
+            else //이미 path가 있을 경우
             {
                 #region Footstep
-                e.m_footstepTimer += Time.deltaTime;
+                e.m_footstepTimer += Time.deltaTime; //발소리 재생간격 시간초 카운트
 
                 if (e.m_footstepTimer > e.m_footstepCycle)
                 {
-                    if (e.m_footstepTurn == 0)
+                    if (e.m_footstepTurn == 0) //왼쪽
                     {
                         SoundManager.Instance.Play3DSound(SoundManager.eAudioClip.FOOTSTEP3, e.gameObject.transform.position, 8f, 1f);
                         e.m_footstepTurn = 1;
                     }
-                    else if (e.m_footstepTurn == 1)
+                    else if (e.m_footstepTurn == 1) //오른쪽 발소리 재생
                     {
                         SoundManager.Instance.Play3DSound(SoundManager.eAudioClip.FOOTSTEP4, e.gameObject.transform.position, 8f, 1f);
                         e.m_footstepTurn = 0;
                     }
 
-                    e.m_footstepTimer = 0f;
+                    e.m_footstepTimer = 0f; //초기화
                 }
                 #endregion
 
+		//목적지에 거의 다가왔다면 멈춰준 후, 다시 IDLE 상태로 변경해준다.
                 if (e.m_navAgent.remainingDistance <= e.m_navAgent.stoppingDistance)
                 {
                     e.m_navAgent.ResetPath();
@@ -1086,16 +1097,16 @@ public class Enemy_PATROL : FSMSingleton<Enemy_PATROL>, IFSMState<Enemy_StateMan
                 }
             }
         }
-        else
+        else //플레이어를 감지했을 경우
         {
-            e.ChangeState(Enemy_IDLE.Instance);
+            e.ChangeState(Enemy_IDLE.Instance); //플레이어를 감지했으면 IDLE을 거쳐 RUN 혹은 ATTACK 상태로 변경되게 될 것임.
         }
     }
 
     //  상태 종료..
     public void Exit(Enemy_StateManager e)
     {
-        e.m_navAgent.ResetPath();
+        e.m_navAgent.ResetPath(); //path 초기화
         e.m_anim.SetBool("ISWALK", false);
         e.m_footstepCycle = 0f;
     }
@@ -1110,7 +1121,7 @@ public class Enemy_PATROL : FSMSingleton<Enemy_PATROL>, IFSMState<Enemy_StateMan
 <div markdown="1">
 
 ```c#
-public class Enemy_ATTACK : FSMSingleton<Enemy_ATTACK>, IFSMState<Enemy_StateManager>
+public class Enemy_ATTACK : FSMSingleton<Enemy_ATTACK>, IFSMState<Enemy_StateManager> //ATTACK상태 클래스 - 싱글턴 및 IFSMState 인터페이스 상속
 {
     //  상태 진입..
     public void Enter(Enemy_StateManager e)
@@ -1121,27 +1132,28 @@ public class Enemy_ATTACK : FSMSingleton<Enemy_ATTACK>, IFSMState<Enemy_StateMan
     //  상태 진행..
     public void Execute(Enemy_StateManager e)
     {
-        if(e.SearchTarget())
+        if(e.SearchTarget()) //플레이어를 감지했을 경우
         {
-            Vector3 dir = e.m_player.transform.position - e.gameObject.transform.position;
+            Vector3 dir = e.m_player.transform.position - e.gameObject.transform.position; //플레이어의 위치 방향을 구한다.
+	    //보간을 이용해 부드럽게 플레이어를 바라보게 한다.
             e.gameObject.transform.forward = Vector3.Lerp(e.gameObject.transform.forward, new Vector3(dir.x, 0f, dir.z), Time.deltaTime * 3f);
 
-            if (!e.m_info.IsName("RELOAD"))
+            if (!e.m_info.IsName("RELOAD")) //재장전 중이 아닐 경우
             {
-                if (e.canAttack())
+                if (e.canAttack()) //플레이어가 공격 가능 거리내에 있을 경우
                 {
-                    e.m_anim.SetBool("ISATTACK", true);
+                    e.m_anim.SetBool("ISATTACK", true); //공격 애니메이션 작동 -> 애니메이션 Event로 Enemy_StateManager의 Fire() 메소드를 호출함.
                 }
                 else
                 {
-                    e.m_idleTime = 1f;//빠르게 재추적하도록 유도.
-                    e.ChangeState(Enemy_IDLE.Instance);
+                    e.m_idleTime = 1f;//IDLE로 넘어갔다가, 빠르게 재추적(RUN)하도록 시간을 1로 세팅해둠.
+                    e.ChangeState(Enemy_IDLE.Instance); //IDLE로 상태변경
                 }
             }
         }
-        else
+        else //플레이어를 감지하지 못했을 경우
         {
-            e.ChangeState(Enemy_IDLE.Instance);
+            e.ChangeState(Enemy_IDLE.Instance); //IDLE로 상태변경
         }
     }
 
@@ -1161,35 +1173,34 @@ public class Enemy_ATTACK : FSMSingleton<Enemy_ATTACK>, IFSMState<Enemy_StateMan
 <div markdown="1">
 
 ```c#
-public class Enemy_RUN : FSMSingleton<Enemy_RUN>, IFSMState<Enemy_StateManager>
+public class Enemy_RUN : FSMSingleton<Enemy_RUN>, IFSMState<Enemy_StateManager> //RUN상태 클래스 - 싱글턴 및 IFSMState 인터페이스 상속
 {
     //  상태 진입..
     public void Enter(Enemy_StateManager e)
     {
-        e.m_navAgent.speed = 2.5f;
-        e.m_footstepCycle = 0.5f;
-        //e.m_navAgent.stoppingDistance = e.m_attackSight;
+        e.m_navAgent.speed = 2.5f; //속도를 RUN에 맞게 설정
+        e.m_footstepCycle = 0.5f; //속도에 맞게 발소리 재생간격 설정
     }
 
     //  상태 진행..
     public void Execute(Enemy_StateManager e)
     {
-        if (e.SearchTarget())
+        if (e.SearchTarget()) //플레이어를 감지했을 경우
         {
-            e.m_anim.SetBool("ISRUN", true);
-            e.m_navAgent.SetDestination(e.m_player.transform.position);
+            e.m_anim.SetBool("ISRUN", true); //달리기 애니메이션 작동
+            e.m_navAgent.SetDestination(e.m_player.transform.position); //플레이어 위치로 이동시켜준다.
 
             #region Footstep
-            e.m_footstepTimer += Time.deltaTime;
+            e.m_footstepTimer += Time.deltaTime; //발소리 재생간격 시간초 카운트
 
             if (e.m_footstepTimer > e.m_footstepCycle)
             {
-                if (e.m_footstepTurn == 0)
+                if (e.m_footstepTurn == 0) //왼발
                 {
                     SoundManager.Instance.Play3DSound(SoundManager.eAudioClip.FOOTSTEP3, e.gameObject.transform.position, 20f, 1f);
                     e.m_footstepTurn = 1;
                 }
-                else if (e.m_footstepTurn == 1)
+                else if (e.m_footstepTurn == 1) //오른발 발소리 클립 재생
                 {
                     SoundManager.Instance.Play3DSound(SoundManager.eAudioClip.FOOTSTEP4, e.gameObject.transform.position, 20f, 1f);
                     e.m_footstepTurn = 0;
@@ -1199,14 +1210,14 @@ public class Enemy_RUN : FSMSingleton<Enemy_RUN>, IFSMState<Enemy_StateManager>
             }
             #endregion
 
-            if (e.canAttack())
+            if (e.canAttack()) //플레이어가 공격 가능 거리내에 있을 경우
             {
-                e.ChangeState(Enemy_IDLE.Instance);
+                e.ChangeState(Enemy_IDLE.Instance); //IDLE로 상태 변경
             }
         }
-        else
+        else //플레이어를 감지하지 못했을 
         {
-            e.ChangeState(Enemy_IDLE.Instance);
+            e.ChangeState(Enemy_IDLE.Instance); //IDLE로 상태 변경
         }
     }
 
@@ -1229,19 +1240,20 @@ public class Enemy_RUN : FSMSingleton<Enemy_RUN>, IFSMState<Enemy_StateManager>
 <div markdown="1">
 
 ```c#
-public class Enemy_DIE : FSMSingleton<Enemy_DIE>, IFSMState<Enemy_StateManager>
+public class Enemy_DIE : FSMSingleton<Enemy_DIE>, IFSMState<Enemy_StateManager> //DIE상태 클래스 - 싱글턴 및 IFSMState 인터페이스 상속
 {
     //  상태 진입..
     public void Enter(Enemy_StateManager e)
     {
-        e.RagdollOnOff(false);
-        GameManager.Instance.AddScore(50);
+        e.RagdollOnOff(false); //래그돌을 동작시키기 위해서, 모든 리지드바디들의 isKinematic을 false로 설정. 
+        GameManager.Instance.AddScore(50); //플레이어가 적을 죽였으니 50점 추가.
     }
 
     //  상태 진행..
     public void Execute(Enemy_StateManager e)
     {
-        e.m_dieTime += Time.deltaTime;
+    	//5초뒤에 비활성화시켜줌.
+        e.m_dieTime += Time.deltaTime; 
 
         if(e.m_dieTime >= 5f)
         {
@@ -1266,14 +1278,14 @@ public class Enemy_DIE : FSMSingleton<Enemy_DIE>, IFSMState<Enemy_StateManager>
 <br>
 
 <details>
-<summary>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;인질 FSM 접기/펼치기</summary>
+<summary>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;인질 FSM Code 접기/펼치기</summary>
 <div markdown="1">
 
 ```c#
 public class Hostage_Controller : MonoBehaviour
 {
     #region Field
-    public enum eState
+    public enum eState //인질이 가질 수 있는 상태들을 열거형으로 정리.
     {
         TIED,
         RESCUE,
@@ -1282,15 +1294,15 @@ public class Hostage_Controller : MonoBehaviour
         MAX
     }
 
-    eState m_state;
-    Animator m_anim;
+    eState m_state; //현재 상태
+    Animator m_anim; //애니메이터
     NavMeshAgent m_nav;
-    float m_disFromPlayer;
-    AnimatorStateInfo m_info;
-    GameObject m_player;
-    float m_footstepTimer;
-    float m_footstepCycle;
-    int m_footstepTurn;
+    float m_disFromPlayer; //플레이어와의 유지거리
+    AnimatorStateInfo m_info; //현재 동작중인 애니메이션 정보
+    GameObject m_player; //플레이어
+    float m_footstepTimer; //발소리 m_footstepCycle 마다 발소리를 재생시키기 위해 시간초를 카운팅하는 변수. 
+    float m_footstepCycle; //발소리 재생 간격
+    int m_footstepTurn; //왼발, 오른발 번갈아가며 재생하기 위함.
     #endregion
 
     #region Unity Methods
@@ -1298,75 +1310,77 @@ public class Hostage_Controller : MonoBehaviour
     {
         m_anim = GetComponent<Animator>();
         m_nav = GetComponent<NavMeshAgent>();
-        m_disFromPlayer = 3f;
-        m_state = eState.TIED;
+        m_disFromPlayer = 3f; //유지거리 설정
+        m_state = eState.TIED; //묶여있는 상태로 초기화
         m_footstepTimer = 0f;
-        m_footstepCycle = 0.5f;
+        m_footstepCycle = 0.5f; //인질의 이동속도에 맞춰 재생간격 설정
         m_footstepTurn = 0;
     }
 
     void Update()
     {
-        if(m_player != null && m_state == eState.TIED)
+        if(m_player != null && m_state == eState.TIED) //인질이 묶여있는 상태이고, 플레이어가 감지되었을 경우
         {
-            if (Input.GetKey(KeyCode.F))
+            if (Input.GetKey(KeyCode.F)) //F키를 누르고 있을 경우
             {
-                if (UIManager.Instance.ProgressBarFill(0.2f))
+                if (UIManager.Instance.ProgressBarFill(0.2f)) //진행바의 이미지를 서서히 채워준다. 만약 진행바가 전부 채워졌다면 내부로 진입
                 {
-                    m_state = eState.RESCUE;
-                    UIManager.Instance.ProgressObjOnOff(false);
-                    SoundManager.Instance.Play2DSound(SoundManager.eAudioClip.UNTIE_HOSTAGE, 1f);
+                    m_state = eState.RESCUE; //구출된 상태로 변경
+                    UIManager.Instance.ProgressObjOnOff(false); //진행바를 비활성화
+                    SoundManager.Instance.Play2DSound(SoundManager.eAudioClip.UNTIE_HOSTAGE, 1f); //밧줄을 풀어주는 사운드 재생.
                 }
             }
-            else
+            else //F키에서 손을 뗐을 경우
             {
-                UIManager.Instance.ProgressBarFill(-0.2f);
+                UIManager.Instance.ProgressBarFill(-0.2f); //진행바의 이미지를 서서히 비워준다.
             }
         }
 
-        switch(m_state)
+        switch(m_state) //FSM
         {
-            case eState.TIED:
+            case eState.TIED: //묶여있는 상태
                 break;
 
-            case eState.RESCUE:
-                m_anim.SetTrigger("ISRESCUE");
+            case eState.RESCUE: //구출된 직후 상태
+                m_anim.SetTrigger("ISRESCUE"); //구출 애니메이션 작동
 
-                m_info = m_anim.GetCurrentAnimatorStateInfo(0);
-                if (m_info.IsName("Hostage_IDLE"))
+                m_info = m_anim.GetCurrentAnimatorStateInfo(0); //현재 진행중인 애니메이션 정보를 받아옴.
+                if (m_info.IsName("Hostage_IDLE")) //만약 구출 애니메이션 작동이 끝나고, IDLE 애니메이션으로 넘어간 상태일 경우
                 {
-                    GameManager.Instance.AddScore(500);
-                    GameManager.Instance.HostageRescued();
-                    m_state = eState.IDLE;
+                    GameManager.Instance.AddScore(500); //500점 추가.
+                    GameManager.Instance.HostageRescued(); //탈출 시 만나게될 새로운 적들을 활성화시키고, SafeZone 파티클시스템을 활성화시켜줌.
+                    m_state = eState.IDLE; //IDLE상태로 변경
                 }
                 break;
 
-            case eState.IDLE:
-                m_nav.ResetPath();
-                Vector3 dir = m_player.transform.position - gameObject.transform.position;
+            case eState.IDLE: //Idle 상태
+                m_nav.ResetPath(); //path 초기화
+                Vector3 dir = m_player.transform.position - gameObject.transform.position; //플레이어의 위치 방향을 구함.
+		//보간을 이용해 부드럽게 플레이어를 바라보도록 함.
                 gameObject.transform.forward = Vector3.Lerp(gameObject.transform.forward, new Vector3(dir.x, 0f, dir.z), Time.deltaTime * 3f);
 
+		//플레이어와의 거리가 유지거리 이상으로 멀어질 경우
                 if (Vector3.Distance(gameObject.transform.position, m_player.transform.position) > m_disFromPlayer)
                 {
-                    m_state = eState.RUN;
+                    m_state = eState.RUN; //RUN 상태로 변경한다.
                 }
                 break;
 
-            case eState.RUN:
-                m_anim.SetBool("ISRUN", true);
-                m_nav.SetDestination(m_player.transform.position);
+            case eState.RUN: //달리기 상태
+                m_anim.SetBool("ISRUN", true); //달리기 애니메이션 작동
+                m_nav.SetDestination(m_player.transform.position); //플레이어의 위치로 이동시켜줌.
 
                 #region Footstep
-                m_footstepTimer += Time.deltaTime;
+                m_footstepTimer += Time.deltaTime; 
 
-                if (m_footstepTimer > m_footstepCycle)
+                if (m_footstepTimer > m_footstepCycle) //발소리 재생간격 시간초 카운트
                 {
-                    if (m_footstepTurn == 0)
+                    if (m_footstepTurn == 0) //왼발
                     {
                         SoundManager.Instance.Play3DSound(SoundManager.eAudioClip.FOOTSTEP3, gameObject.transform.position, 10f, 1f);
                         m_footstepTurn = 1;
                     }
-                    else if (m_footstepTurn == 1)
+                    else if (m_footstepTurn == 1) //오른발 클립 재생
                     {
                         SoundManager.Instance.Play3DSound(SoundManager.eAudioClip.FOOTSTEP4, gameObject.transform.position, 10f, 1f);
                         m_footstepTurn = 0;
@@ -1376,10 +1390,11 @@ public class Hostage_Controller : MonoBehaviour
                 }
                 #endregion
 
+		//플레이어와의 거리가 유지거리 내일 경우
                 if (Vector3.Distance(gameObject.transform.position, m_player.transform.position) <= m_disFromPlayer)
                 {
-                    m_anim.SetBool("ISRUN", false);
-                    m_state = eState.IDLE;
+                    m_anim.SetBool("ISRUN", false); //달리기 애니메이션 중지
+                    m_state = eState.IDLE; //Idle 상태로 변경
                 }
                 break;
 
@@ -1390,18 +1405,21 @@ public class Hostage_Controller : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
+    	//인질이 묶여있는 상태이며, 플레이어가 인질의 trigger 콜라이더 내에 진입했을 경우
         if ((other.gameObject.layer.Equals(LayerMask.NameToLayer("Player")) || other.gameObject.name.Equals("Player")) && m_state == eState.TIED )
         {
-            m_player = other.transform.root.gameObject;
-            UIManager.Instance.ProgressObjOnOff(true);
+            m_player = other.transform.root.gameObject; //m_player가 구출가능 거리로 다가왔음을 알리기 위함.
+            UIManager.Instance.ProgressObjOnOff(true); //구출 진행바를 활성화
         }
     }
 
     private void OnTriggerExit(Collider other)
     {
+    	//인질이 묶여있는 상태이며, 플레이어가 인질의 trigger 콜라이더 바깥으로 나갔을 경우
         if ((other.gameObject.layer.Equals(LayerMask.NameToLayer("Player")) || other.gameObject.name.Equals("Player")) && m_state == eState.TIED)
         {
-            UIManager.Instance.ProgressObjOnOff(false);
+	    m_player = null; //m_player가 구출가능 거리가 아니라는것을 알리기 위함.
+            UIManager.Instance.ProgressObjOnOff(false); //구출 진행바를 비활성화
         }
     }
     #endregion
