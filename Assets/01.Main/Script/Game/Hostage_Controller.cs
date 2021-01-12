@@ -134,6 +134,7 @@ public class Hostage_Controller : MonoBehaviour
     {
         if ((other.gameObject.layer.Equals(LayerMask.NameToLayer("Player")) || other.gameObject.name.Equals("Player")) && m_state == eState.TIED)
         {
+            m_player = null;
             UIManager.Instance.ProgressObjOnOff(false);
         }
     }

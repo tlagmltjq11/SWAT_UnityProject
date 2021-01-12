@@ -12,25 +12,26 @@ public class FSMSingleton<T> : MonoBehaviour where T : MonoBehaviour
 			{
 				if (_instance == null)
 				{
-					_instance = (T) FindObjectOfType(typeof(T));
+					_instance = (T) FindObjectOfType(typeof(T)); 
 					
-					if ( FindObjectsOfType(typeof(T)).Length > 1 )
+					if ( FindObjectsOfType(typeof(T)).Length > 1 ) //1개 이상 생성된 경우
 					{
-						Debug.LogError("--- FSMSingleton error ---");
+						Debug.LogError("--- FSMSingleton error ---"); //에러메세지 출력
 						return _instance;
 					}
 					
-					if (_instance == null)
+					if (_instance == null) //찾아도 없을 경우
 					{
-						GameObject singleton = new GameObject();
+						//새로 인스턴스화 해서 리턴
+						GameObject singleton = new GameObject(); 
 						_instance = singleton.AddComponent<T>();
 						singleton.name = "(singleton) "+ typeof(T).ToString();
 						singleton.hideFlags = HideFlags.HideAndDontSave;
 					}
-					else
+					else //있을 경우
 						Debug.LogError("--- FSMSingleton already exists ---");
 				}
-				return _instance;
+				return _instance; //반환
 			}
 		}
 	}

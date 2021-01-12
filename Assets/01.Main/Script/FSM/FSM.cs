@@ -2,49 +2,49 @@ using UnityEngine;
 
 public class FSM <T>  : MonoBehaviour
 {
-	private T owner;
-	private IFSMState<T> currentState = null;
-	private IFSMState<T> previousState = null;
+	private T m_owner;
+	private IFSMState<T> m_currentState = null;
+	private IFSMState<T> m_previousState = null;
 
-	public IFSMState<T> CurrentState{ get {return currentState;} }
-	public IFSMState<T> PreviousState{ get {return previousState;} }
+	public IFSMState<T> CurrentState{ get {return m_currentState;} }
+	public IFSMState<T> PreviousState{ get {return m_previousState;} }
 
 	//	초기 상태 설정..
 	protected void InitState(T owner, IFSMState<T> initialState)
 	{
-		this.owner = owner;
+		this.m_owner = owner;
 		ChangeState(initialState);
 	}
 
 	//	각 상태의 Idle 처리..
 	protected void  FSMUpdate() 
 	{ 
-		if (currentState != null) currentState.Execute(owner);
+		if (m_currentState != null) m_currentState.Execute(m_owner);
 	}
 
 	//	상태 변경..
 	public void  ChangeState(IFSMState<T> newState)
 	{
-		previousState = currentState;
+		m_previousState = m_currentState;
  
-		if (currentState != null)
-			currentState.Exit(owner);
+		if (m_currentState != null)
+			m_currentState.Exit(m_owner);
+
+		m_currentState = newState;
  
-		currentState = newState;
- 
-		if (currentState != null)
-			currentState.Enter(owner);
+		if (m_currentState != null)
+			m_currentState.Enter(m_owner);
 	}
 
 	//	이전 상태로 전환..
 	public void  RevertState()
 	{
-		if (previousState != null)
-			ChangeState(previousState);
+		if (m_previousState != null)
+			ChangeState(m_previousState);
 	}
 
 	public override string ToString() 
 	{ 
-		return currentState.ToString(); 
+		return m_currentState.ToString(); 
 	}
 }

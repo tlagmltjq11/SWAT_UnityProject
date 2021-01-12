@@ -5,20 +5,6 @@ using UnityEngine;
 
 public class Weapon_AKM : Weapon
 {
-    #region Field
-	//Enums
-    public enum eAudioClip
-	{
-		FIRE,
-		RELOAD,
-		DRAW,
-		AIMIN,
-		HIT,
-		HEADSHOT,
-		Max
-	}
-    #endregion
-
     #region Unity Methods
     private void OnEnable()
     {
@@ -220,8 +206,8 @@ public class Weapon_AKM : Weapon
 		m_recoiltHoriz = 0.65f;
 	}
 
-	public override void Reload()
-	{
+    public override void Reload()
+    {
 		if (m_currentBullets == m_bulletsPerMag || m_bulletsRemain == 0)
 		{
 			return;
@@ -229,44 +215,6 @@ public class Weapon_AKM : Weapon
 
 		SoundManager.Instance.Play2DSound_Play((int)SoundManager.eAudioClip.AKM_RELOAD, 1f);
 		m_anim.CrossFadeInFixedTime("RELOAD", 0.01f);
-	}
-
-	public override void AimIn()
-	{
-		m_anim.SetBool("ISAIM", true);
-		m_isAiming = true;
-
-		m_accuracy = m_accuracy / 4f;
-
-		if (UIManager.Instance != null)
-		{
-			UIManager.Instance.CrossHairOnOff(false);
-		}
-		SoundManager.Instance.Play2DSound(SoundManager.eAudioClip.AIM_IN, 3.5f);
-	}
-
-	public override void AimOut()
-	{
-		m_isAiming = false;
-		m_anim.SetBool("ISAIM", false);
-
-		if(m_stateManager.m_isCrouching)
-        {
-			m_accuracy = m_originAccuracy / 2f;
-        }
-		else if(!m_stateManager.m_isGrounded)
-        {
-			m_accuracy = m_originAccuracy * 5f;
-        }
-		else
-        {
-			m_accuracy = m_originAccuracy;
-		}
-
-		if (UIManager.Instance != null)
-		{
-			UIManager.Instance.CrossHairOnOff(true);
-		}
 	}
 
     public override void ChangeSight()
@@ -298,91 +246,6 @@ public class Weapon_AKM : Weapon
         {
 			m_sights[index].SetActive(true);
         }
-    }
-
-    public override void Recoil()
-	{
-		Vector3 HorizonCamRecoil = new Vector3(0f, Random.Range(-m_recoiltHoriz, m_recoiltHoriz), 0f);
-		Vector3 VerticalCamRecoil = new Vector3(-m_recoilVert, 0f, 0f);
-
-		if (!m_isAiming)
-		{
-			Vector3 gunRecoil = new Vector3(Random.Range(-m_recoilKickBack.x, m_recoilKickBack.x), m_recoilKickBack.y, m_recoilKickBack.z);
-			transform.localPosition = Vector3.Lerp(transform.localPosition, transform.localPosition + gunRecoil, m_recoilAmount);
-
-			m_horizonCamRecoil.transform.localRotation = Quaternion.Slerp(m_horizonCamRecoil.transform.localRotation, Quaternion.Euler(m_horizonCamRecoil.transform.localEulerAngles + HorizonCamRecoil), m_recoilAmount);
-			m_cameraRotate.VerticalCamRotate(-VerticalCamRecoil.x); //현재 이걸로 수직반동 올리는 중임.
-		}
-		else
-		{
-			Vector3 gunRecoil = new Vector3(Random.Range(-m_recoilKickBack.x, m_recoilKickBack.x) / 2f, 0, m_recoilKickBack.z);
-			transform.localPosition = Vector3.Lerp(transform.localPosition, transform.localPosition + gunRecoil, m_recoilAmount);
-
-			m_horizonCamRecoil.transform.localRotation = Quaternion.Slerp(m_horizonCamRecoil.transform.localRotation, Quaternion.Euler(m_horizonCamRecoil.transform.localEulerAngles + HorizonCamRecoil / 1.5f), m_recoilAmount);
-			m_cameraRotate.VerticalCamRotate(-VerticalCamRecoil.x / 2f); //현재 이걸로 수직반동 올리는 중임.
-		}
-	}
-
-	public override void RecoilBack()
-	{
-		m_horizonCamRecoil.transform.localRotation = Quaternion.Slerp(m_horizonCamRecoil.transform.localRotation, Quaternion.Euler(0f, 0f, 0f), Time.deltaTime * 3f);
-	}
-
-	public override void CasingEffect()
-	{
-		Quaternion randomQuaternion = new Quaternion(Random.Range(0f, 360f), Random.Range(0f, 360f), Random.Range(0f, 360f), 1);
-		var casing = ObjPool.Instance.m_casingPool.Get();
-
-		if (casing != null)
-		{
-			casing.transform.SetParent(m_casingPoint);
-			casing.transform.localPosition = new Vector3(-1f, -3.5f, 0f);
-			casing.transform.localScale = new Vector3(25, 25, 25);
-			casing.transform.localRotation = Quaternion.identity;
-
-			casing.gameObject.GetComponent<Rigidbody>().isKinematic = false;
-			casing.gameObject.SetActive(true);
-			casing.gameObject.GetComponent<Rigidbody>().AddRelativeForce(new Vector3(Random.Range(50f, 100f), Random.Range(50f, 100f), Random.Range(-10f, 20f)));
-			casing.gameObject.GetComponent<Rigidbody>().MoveRotation(randomQuaternion.normalized);
-		}
-	}
-
-	public override void JumpAccuracy(bool j)
-    {
-		if(j)
-        {
-			m_accuracy = m_accuracy * 5f;
-        }
-		else
-        {
-			if(m_isAiming)
-            {
-				m_accuracy = m_originAccuracy / 4f;
-            }
-			else
-            {
-				m_accuracy = m_originAccuracy;
-            }
-        }
-    }
-
-	public override void CrouchAccuracy(bool c)
-    {
-		if (c)
-        {
-			m_accuracy = m_accuracy / 2f;
-        }
-		else
-        {
-			if (m_isAiming)
-			{
-				m_accuracy = m_originAccuracy / 4f;
-			}
-			else
-			{
-				m_accuracy = m_originAccuracy;
-			}
-		}
     }
     #endregion
 

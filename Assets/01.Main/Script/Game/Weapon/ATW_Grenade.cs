@@ -27,15 +27,6 @@ public class ATW_Grenade : ATW
     #region Abstract Methods Implement
     public override void Operation()
     {
-        StartCoroutine("Operator");
-    }
-    #endregion
-
-    #region Coroutine
-    IEnumerator Operator()
-    {
-        yield return new WaitForSeconds(m_timeToOper);
-
         //파티클시스템을 작동시키기 위해서, 수류탄의 몸체를 정지시킨 후 똑바로 세워놓음.
         m_rigid.velocity = Vector3.zero;
         m_rigid.angularVelocity = Vector3.zero;

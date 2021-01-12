@@ -213,12 +213,6 @@ public class Player_MOVE : FSMSingleton<Player_MOVE>, IFSMState<Player_StateMana
         //고로 발밑에 m_groundCheck를 두고, 0.4f 반지름만큼 원을 생성하고 바닥레이어와 충돌 시 바닥에 닿았다는 것을 처리하게됨.
         e.m_isGrounded = Physics.CheckSphere(e.m_groundCheck.position, e.m_groundDistance, e.m_groundMask);
 
-        //계단오르내릴때 소리나는거 처리하기*************************************************************************
-        /*if(e.m_isGrounded && !e.m_PreviouslyGrounded && !e.m_isCrouching)
-        {
-            SoundManager.Instance.Play2DSound(SoundManager.eAudioClip.LAND, 0.8f);
-        }*/
-
         e.m_PreviouslyGrounded = e.m_isGrounded;
         
         if (e.m_isGrounded && e.m_velocity.y < 0f)

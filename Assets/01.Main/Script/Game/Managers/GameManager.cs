@@ -204,6 +204,5 @@ public class GameManager : SingletonMonoBehaviour<GameManager>
         }
     }
 
-    //페이드인 아웃 코루틴 만들어야함.
     #endregion
 }

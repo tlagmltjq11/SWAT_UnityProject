@@ -2,17 +2,24 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public abstract class ATW : MonoBehaviour
+public abstract class ATW : MonoBehaviour //ahead thrown weapon
 {
     #region Field
-    public Rigidbody m_rigid;
     public GameObject m_effectObj;
     public GameObject m_meshObj;
+    public Rigidbody m_rigid;
     public int m_remainNum;
-    public float m_timeToOper;
     public string m_name;
-    public float m_power;
-    public float m_explosionRadius;
+    public float m_timeToOper;
+    protected float m_power;
+    protected float m_explosionRadius;
+    #endregion
+
+    #region Public Methods
+    public void Starter()
+    {
+        Invoke("Operation", m_timeToOper);
+    }
     #endregion
 
     #region Abstract Methods

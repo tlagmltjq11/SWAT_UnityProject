@@ -17,8 +17,6 @@ public class Enemy_ATTACK : FSMSingleton<Enemy_ATTACK>, IFSMState<Enemy_StateMan
         {
             Vector3 dir = e.m_player.transform.position - e.gameObject.transform.position;
             e.gameObject.transform.forward = Vector3.Lerp(e.gameObject.transform.forward, new Vector3(dir.x, 0f, dir.z), Time.deltaTime * 3f);
-            //e.m_upperBody.transform.forward = Vector3.Lerp(e.m_upperBody.transform.forward, dir, Time.deltaTime * 3f);
-            //슛포인트도 조정해야함.
 
             if (!e.m_info.IsName("RELOAD"))
             {

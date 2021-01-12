@@ -9,7 +9,6 @@ public class Enemy_StateManager : FSM<Enemy_StateManager>
     public Animator m_anim;
     public GameObject m_player;
     public NavMeshAgent m_navAgent;
-    public GameObject m_upperBody;
     public GameObject m_shootPoint;
     public LineRenderer m_lineRenderer;
     public AnimatorStateInfo m_info;
@@ -206,6 +205,7 @@ public class Enemy_StateManager : FSM<Enemy_StateManager>
         {
             m_hp = m_hp - dmg;
 
+            /*
             if(canAttack())
             {
                 ChangeState(Enemy_ATTACK.Instance);
@@ -214,6 +214,7 @@ public class Enemy_StateManager : FSM<Enemy_StateManager>
             {
                 ChangeState(Enemy_RUN.Instance);
             }
+            */
         }
     }
 

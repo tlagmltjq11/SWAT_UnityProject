@@ -60,6 +60,7 @@ public class AmmoSupplyBox : MonoBehaviour
     private void OnTriggerExit(Collider other)
     {
         if (other.gameObject.layer == LayerMask.NameToLayer("Player") || other.gameObject.name.Equals("Player"))
+
         {
             m_player = null;
             m_canvas.SetActive(false);

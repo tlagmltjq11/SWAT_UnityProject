@@ -132,7 +132,7 @@ public class Player_StateManager : FSM<Player_StateManager>
 
                     SoundManager.Instance.Play2DSound(SoundManager.eAudioClip.ATW_THROW, 1f);
                     scr.m_rigid.AddForce(grenade.transform.up * 5f + grenade.transform.forward * 15f, ForceMode.Impulse);
-                    scr.Operation();
+                    scr.Starter();
 
                     m_currentATW.m_remainNum--;
                     UIManager.Instance.Update_RemainATW(m_currentATW.m_remainNum);
