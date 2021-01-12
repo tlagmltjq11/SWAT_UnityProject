@@ -1674,6 +1674,10 @@ public class SoundManager : SingletonMonoBehaviour<SoundManager> //싱글턴패�
 </div>
 </details>
 
+**Explanation**:wrench:<br>
+(구현설명은 주석으로 간단하게 처리했습니다!)<br>
+싱글턴패턴을 적용한 SoundManager 같은 경우 모든 사운드클립 및 오디오소스를 관리하며 재생 및 중단을 수행하게끔 정리했습니다. 이를 통해 사운드 재생이 필요한 곳에서 쉽게 참조하여 간편하게 사용할 수 있었으며, 난무하는 오디오소스 컴포넌트를 방지할 수 있었습니다. 특히 3D사운드 재생에 관련해서는 생성, 삭제 과정의 오버헤드를 방지하기 위해 3D오디오소스를 부착한 오브젝트를 Object Pooling으로 관리하면서 사용합니다. 또한 오디오 과부하를 방지하기 위해 Object Pool에서도 최대로 생성될 수 있는 갯수를 제한해, 동시에 재생될 수 있는 3D오디오소스 수를 제한했습니다.
+
 </div>
 </details>
 
