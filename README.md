@@ -1461,6 +1461,227 @@ void Update()
 <details>
 <summary>Managers Code 접기/펼치기</summary>
 <div markdown="1">
+
+<details>
+<summary>&nbsp;&nbsp;&nbsp;&nbsp;SoundManager 접기/펼치기</summary>
+<div markdown="1">
+
+```c#
+public class SoundManager : SingletonMonoBehaviour<SoundManager> //싱글턴패턴 
+{
+    #region Field
+    public enum eAudioClip
+    {
+        FOOTSTEP1,
+        FOOTSTEP2,
+        FOOTSTEP3,
+        FOOTSTEP4,
+        JUMP,
+        LAND,
+        AKM_SHOOT,
+        M4_SHOOT,
+        GLOCK_SHOOT,
+        AKM_DRAW,
+        GLOCK_DRAW,
+        AKM_RELOAD,
+        GLOCK_RELOAD,
+        AIM_IN,
+        GRUNT1,
+        GRUNT2,
+        GRUNT3,
+        GRUNT4,
+        ENEMY_DEATH1,
+        ENEMY_DEATH2,
+        ENEMY_DEATH3,
+        HITSOUND,
+        HEADSHOT,
+        SUPPLY,
+        PLAYER_DEATH,
+        M4_RELOAD,
+        ATW_EXPLOSION1,
+        ATW_EXPLOSION2,
+        ATW_IMPACTONTGROUND,
+        ATW_THROW,
+        SUPPLYBOX_OPEN,
+        SUPPLYBOX_CLOSE,
+        ATW_CHANGE,
+        HEALTH_SUPPLY,
+        UNTIE_HOSTAGE,
+        FLASH_ON,
+        FLASH_OFF,
+        BUTTON,
+        MAX
+    }
+
+    [SerializeField]
+    AudioClip[] m_clips; //오디오 클립들
+    [SerializeField]
+    AudioSource m_2DSoundSource; //PlayOneShot Method 전용
+    [SerializeField] 
+    AudioSource m_2DSoundSource_Play; //Play Method 전용
+    [SerializeField]
+    AudioSource m_BGMSource;
+    [SerializeField]
+    GameObject m_objPoolManager; //오브젝트풀 매니저 하위에 모든 풀링 오브젝트들이 들어가있음.
+    [SerializeField]
+    AudioMixer m_audioMixer; //볼륨관리를 위한 오디오믹서
+    List<AudioSource> m_pausedAudios = new List<AudioSource>(); //일시중지된 오디오소스들을 담아놓는 리스트.
+    #endregion
+
+    #region Unity Methods
+    void Start()
+    {
+        BGMAudioControl(PlayerPrefs.GetFloat("BGMVolume")); //PlayerPrefs에 저장된 볼륨크기로 초기화
+        EffectAudioControl(PlayerPrefs.GetFloat("SFXVolume")); //PlayerPrefs에 저장된 볼륨크기로 초기화
+    }
+    #endregion
+
+    #region Public Methods
+    public void EffectAudioControl(float volume) //UI슬라이더에 연결된 메소드 -> Effect 볼륨조절
+    {
+        if(volume == -40f)
+        {
+            m_audioMixer.SetFloat("SFXVolume", -80); //Mute 해주기위함
+        }
+        else
+        {
+            m_audioMixer.SetFloat("SFXVolume", volume);
+        }
+
+        PlayerPrefs.SetFloat("SFXVolume", volume);
+        PlayerPrefs.Save();
+    }
+
+    public void BGMAudioControl(float volume) //UI슬라이더에 연결된 메소드 -> BGM 볼륨조절
+    {
+        if (volume == -40f)
+        {
+            m_audioMixer.SetFloat("BGMVolume", -80); //Mute 해주기위함
+        }
+        else
+        {
+            m_audioMixer.SetFloat("BGMVolume", volume);
+        }
+
+        PlayerPrefs.SetFloat("BGMVolume", volume);
+        PlayerPrefs.Save();
+    }
+
+    public void BGMPlay() //BGM 재생
+    {
+        m_BGMSource.Play();
+    }
+
+    public void BGMPause() //BGM 중지
+    {
+        m_BGMSource.Pause();
+    }
+    
+    //오버로딩 eAudioClip
+    public void Play2DSound(eAudioClip clip, float volume)
+    {
+        m_2DSoundSource.PlayOneShot(m_clips[(int)clip], volume);
+    }
+
+    //오버로딩 int
+    public void Play2DSound(int clip, float volume)
+    {
+        m_2DSoundSource.PlayOneShot(m_clips[clip], volume);
+    }
+
+    //Play Method 전용 -> Reload, Draw 를 연달아서 실행할 경우 사운드가 끊기게 하기 위함.(중복재생방지)
+    public void Play2DSound_Play(int clip, float volume)
+    {
+        m_2DSoundSource_Play.clip = m_clips[clip];
+        m_2DSoundSource_Play.volume = volume;
+        m_2DSoundSource_Play.Play();
+    }
+
+    //3D 사운드 재생
+    public void Play3DSound(eAudioClip clip, Vector3 pos, float maxDistance, float volume)
+    {
+        var obj = ObjPool.Instance.m_audioPool.Get(); //오브젝트 풀에서 3D오디오소스가 부착된 게임오브젝트를 꺼냄.
+
+        if (obj != null)
+        {
+            AudioSource audio = obj.gameObject.GetComponent<AudioSource>(); //오디오소스 Get
+            audio.priority = 128;
+            audio.clip = m_clips[(int)clip]; //클립 지정
+
+            obj.transform.position = pos; //재생시킬 위치 지정
+            audio.maxDistance = maxDistance; //최대거리 
+
+            obj.gameObject.SetActive(true); //오브젝트를 활성화
+            audio.Play(); //재생
+            obj.ReturnInvoke(m_clips[(int)clip].length); //오디오 클립의 길이만큼 대기 후 풀에 반환.
+        }
+    }
+
+    //오버로딩 int
+    public void Play3DSound(int clip, Vector3 pos, float maxDistance, float volume)
+    {
+        var obj = ObjPool.Instance.m_audioPool.Get();
+
+        if (obj != null)
+        {
+            AudioSource audio = obj.gameObject.GetComponent<AudioSource>(); //오디오소스 Get
+            audio.priority = 128;
+            audio.clip = m_clips[clip];  //클립 지정
+
+            obj.transform.position = pos; //재생시킬 위치 지정
+            audio.maxDistance = maxDistance; //최대거리
+
+            obj.gameObject.SetActive(true); //오브젝트를 활성화
+            audio.Play(); //재생
+            obj.ReturnInvoke(m_clips[clip].length); //오디오 클립의 길이만큼 대기 후 풀에 반환.
+        }
+    }
+    
+    public void StopSound() //TimeScale == 0 일 경우 재생중이던 모든 오디오 중지.
+    {
+        if (m_2DSoundSource.isPlaying) //재생중이라면
+        {
+            m_2DSoundSource.Pause(); //재생 중지
+            m_pausedAudios.Add(m_2DSoundSource); //일시중지된 오디오소스 리스트에 추가
+        }
+        if (m_2DSoundSource_Play.isPlaying) //재생중이라면
+        {
+            m_2DSoundSource_Play.Pause(); //재생 중지
+            m_pausedAudios.Add(m_2DSoundSource_Play); //일시중지된 오디오소스 리스트에 추가
+        }
+        if (m_BGMSource.isPlaying) 
+        {
+            m_BGMSource.Pause();
+            m_pausedAudios.Add(m_BGMSource);
+        }
+	
+        //오브젝트풀 매니저 하위에 들어가 있는 3D오디오소스 오브젝트 중 활성화된, 즉 재생 중이던 것들만 가져옴.
+        var sources = m_objPoolManager.GetComponentsInChildren<AudioSource>();
+
+        foreach(AudioSource audio in sources)
+        {
+            audio.Pause(); //일시중지
+	    m_pausedAudios.Add(audio); //일시중지된 오디오소스 리스트에 추가
+        }
+    }
+
+    public void ReStartSound() //TimeScale == 1 일 경우 일시중지되었던 모든 오디오를 다시 재생시켜준다.
+    {
+        //퍼지된 오디오소스만 리스트에 저장해두었다가 재생시킴.
+        for (int i=0; i<m_pausedAudios.Count; i++)
+        {
+            m_pausedAudios[i].Play();
+        }
+	
+        m_pausedAudios.Clear(); //클리어
+    }
+    #endregion
+}
+```
+
+</div>
+</details>
+
 </div>
 </details>
 
