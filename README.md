@@ -435,8 +435,8 @@ public abstract class ATW : MonoBehaviour //Ahead Thrown Weapon 투척무기
     public int m_remainNum; //남은 갯수
     public float m_timeToOper; //동작하기까지 걸리는 시간
     public string m_name;
-    public float m_power; //데미지
-    public float m_explosionRadius; //폭발범위
+    protected float m_power; //데미지
+    protected float m_explosionRadius; //폭발범위
     #endregion
 
     #region Public Methods
