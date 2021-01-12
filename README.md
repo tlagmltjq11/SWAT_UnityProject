@@ -237,17 +237,17 @@ public class Weapon_AKM : Weapon
     //Unity Methods 생략..
     
     #region Abstract Methods Implement
-    public override void Fire()
+    public override void Fire() //총 발사
     {
-	if (m_fireTimer < m_fireRate)
+	if (m_fireTimer < m_fireRate) //연사력을 시간으로 구현
 	{
 		return;
 	}
 
-	SoundManager.Instance.Play2DSound(SoundManager.eAudioClip.AKM_SHOOT, 0.8f);
-
-	if (m_isFiring)
-        {
+	SoundManager.Instance.Play2DSound(SoundManager.eAudioClip.AKM_SHOOT, 0.8f); //발포음 재생
+ 
+	if (m_isFiring) //연사중이라면 반동을 지속해서 키워줌
+        { 
 		m_recoilVert += 0.15f;
 		m_recoilVert = Mathf.Clamp(m_recoilVert, 1.2f, 3f);
 		m_recoiltHoriz += 0.05f;
@@ -259,95 +259,109 @@ public class Weapon_AKM : Weapon
 	int layerMask = ((1 << LayerMask.NameToLayer("Player")) | (1 << LayerMask.NameToLayer("Sfx")) | (1 << LayerMask.NameToLayer("Interactable")) | (1 << LayerMask.NameToLayer("Player_Throw")) | (1 << LayerMask.NameToLayer("Enemy_ExplosionHitCol")));
 	layerMask = ~layerMask;
 		
+	//레이캐스트 발사 == 총알
 	if (Physics.Raycast(m_shootPoint.position, m_shootPoint.transform.forward + Random.onUnitSphere * m_accuracy, out hit, m_range, layerMask))
 	{
-		if (hit.collider.gameObject.layer == LayerMask.NameToLayer("Enemy"))
+		if (hit.collider.gameObject.layer == LayerMask.NameToLayer("Enemy")) //적이 맞았을 경우
 		{
-			var blood = ObjPool.Instance.m_bloodPool.Get();
+			var blood = ObjPool.Instance.m_bloodPool.Get(); //블러드 이펙트를 풀에서 꺼냄
 
 			if (blood != null)
 			{
-				blood.gameObject.transform.position = hit.point;
+				blood.gameObject.transform.position = hit.point; //hit 포인트로 이동
+				//법선벡터를 이용해서 잘보이게 회전시킴.
 				blood.gameObject.transform.rotation = Quaternion.FromToRotation(Vector3.up, hit.normal);
-				blood.gameObject.SetActive(true);
+				blood.gameObject.SetActive(true); //활성화 시켜서 재생시킨다.
 			}
 				
+			//총을 맞은 적
 			Enemy_StateManager enemy = hit.transform.GetComponentInParent<Enemy_StateManager>();
 
 			if (enemy)
 			{
-				if (hit.collider.gameObject.CompareTag("HeadShot"))
+				//Tag비교는 compareTag를 이용!
+				if (hit.collider.gameObject.CompareTag("HeadShot")) //헤드샷 판별
 				{
+					//헤드샷 사운드 재생
 					SoundManager.Instance.Play2DSound(SoundManager.eAudioClip.HEADSHOT, 1.5f);
-					enemy.Damaged(m_power * 100f);
+					enemy.Damaged(m_power * 100f); //바로 죽이기 위해 x 100
 				}
 				else
 				{
+					//Hit 사운드 재생
 					SoundManager.Instance.Play2DSound(SoundManager.eAudioClip.HITSOUND, 1.5f);
 					enemy.Damaged(m_power);
 				}
 			}
 		}
-		else
+		else //적이 아닐 경우
 		{
-			var hitHole = ObjPool.Instance.m_hitHoleObjPool.Get();
+			var hitHole = ObjPool.Instance.m_hitHoleObjPool.Get(); //탄흔 이펙트를 풀에서 꺼냄.
 
 			if (hitHole != null)
 			{
 				hitHole.gameObject.transform.position = hit.point;
+				//법선벡터를 이용해서 잘보이게 회전시킴.
 				hitHole.gameObject.transform.rotation = Quaternion.FromToRotation(Vector3.up, hit.normal);
-				hitHole.transform.SetParent(hit.transform); // 탄흔이 오브젝트를 따라가게끔 유도하기 위해 리턴되기 전까지만 부모로 지정
+				// 탄흔이 오브젝트를 따라가게끔 유도하기 위해 리턴되기 전까지만 부모로 지정
+				hitHole.transform.SetParent(hit.transform); 
 				hitHole.gameObject.SetActive(true);
 			}
 
-			var hitSpark = ObjPool.Instance.m_hitSparkPool.Get();
+			var hitSpark = ObjPool.Instance.m_hitSparkPool.Get(); //사격으로 인한 스파크이펙트를 풀에서 꺼냄.
 
 			if (hitSpark != null)
 			{
 				hitSpark.gameObject.transform.position = hit.point;
+				//법선벡터를 이용해서 잘보이게 회전시킴.
 				hitSpark.gameObject.transform.rotation = Quaternion.FromToRotation(Vector3.up, hit.normal);
-				hitSpark.gameObject.SetActive(true);
+				hitSpark.gameObject.SetActive(true); //활성화시켜 재생시킴.
 			}
 
+			//Movalble은 리지드바디를 가진 오브젝트들의 레이어임.
 			if (hit.transform.gameObject.layer.Equals(LayerMask.NameToLayer("Movable")))
 			{
 				Rigidbody rig = hit.transform.GetComponent<Rigidbody>();
 
 				if (rig)
 				{
+					//피격된 지점에서 물리힘을 가해줌.
 					rig.AddForceAtPosition(m_shootPoint.forward * m_power * 70f, m_shootPoint.position);
 				}
 			}
 		}
 	}
 
-	m_currentBullets--;
+	m_currentBullets--; //탄약 --
 	m_fireTimer = 0.0f;
-	m_anim.CrossFadeInFixedTime("FIRE", 0.01f);
+	m_anim.CrossFadeInFixedTime("FIRE", 0.01f); //애니메이션을 즉시 FIRE로 바꿔줌.
 
-	muzzleFlash.Play();
-	Recoil();
-	CasingEffect();
+	muzzleFlash.Play(); //총기화염 play
+	Recoil(); //반동
+	CasingEffect(); //탄피 이펙트 생성
     }
 
-    public override void StopFiring()
+    public override void StopFiring() //연사를 멈출 경우 반동 회복
     {
 	m_recoilVert = 1.2f;
 	m_recoiltHoriz = 0.65f;
     }
 
-    public override void Reload()
+    public override void Reload() //재장전
     {
+    	//탄창이 꽉차있거나, 남은 탄약이 없다면 return
 	if (m_currentBullets == m_bulletsPerMag || m_bulletsRemain == 0)
 	{
 		return;
 	}
 
+	//재장전 
 	SoundManager.Instance.Play2DSound_Play((int)SoundManager.eAudioClip.AKM_RELOAD, 1f);
-	m_anim.CrossFadeInFixedTime("RELOAD", 0.01f);
+	m_anim.CrossFadeInFixedTime("RELOAD", 0.01f); //애니메이션을 즉시 RELOAD로 바꿔줌
+	//-> UI와 실제 남은 탄약을 바꿔주는 부분은 애니메이션 Event로 ReloadComplete() 메소드를 호출시켜줌.
     }
 
-    public override void ChangeSight()
+    public override void ChangeSight() //Sight 파츠변경
     {
 	bool check = false;
 	int index = 0;
@@ -379,7 +393,7 @@ public class Weapon_AKM : Weapon
     #endregion
 
     #region Public Methods
-    public void ReloadComplete()
+    public void ReloadComplete() //재장전 애니메이션에서 이벤트로 호출시켜준다.
     {
 	int temp = 0;
 
