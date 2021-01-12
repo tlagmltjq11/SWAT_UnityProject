@@ -237,7 +237,7 @@ public class Weapon_AKM : Weapon
     #region Unity Methods
     private void OnEnable()
     {
-		m_anim.CrossFadeInFixedTime("DRAW", 0.01f); //드로우 애니메이션 작동
+	m_anim.CrossFadeInFixedTime("DRAW", 0.01f); //드로우 애니메이션 작동
     }
 
     private void OnDisable()
@@ -258,14 +258,14 @@ public class Weapon_AKM : Weapon
 
     private void Awake()
     {
-		m_anim = GetComponent<Animator>();
+	m_anim = GetComponent<Animator>();
     }
 
     void Start()
     {
-		Init();
-		m_stateManager = m_player.GetComponent<Player_StateManager>();
-		m_cameraRotate = m_camera.GetComponent<CameraRotate>();
+	Init();
+	m_stateManager = m_player.GetComponent<Player_StateManager>();
+	m_cameraRotate = m_camera.GetComponent<CameraRotate>();
     }
 
     void Update()
@@ -279,18 +279,18 @@ public class Weapon_AKM : Weapon
         {
 		if(m_sights[0].activeSelf)
             	{
-				transform.localPosition = Vector3.Lerp(transform.localPosition, m_dotSightPosition, Time.deltaTime * 8f);
-				m_camera.fieldOfView = Mathf.Lerp(m_camera.fieldOfView, 40f, Time.deltaTime * 8f);
+			transform.localPosition = Vector3.Lerp(transform.localPosition, m_dotSightPosition, Time.deltaTime * 8f);
+			m_camera.fieldOfView = Mathf.Lerp(m_camera.fieldOfView, 40f, Time.deltaTime * 8f);
 		}
 		else if(m_sights[1].activeSelf)
             	{
-				transform.localPosition = Vector3.Lerp(transform.localPosition, m_acogSightPosition, Time.deltaTime * 8f);
-				m_camera.fieldOfView = Mathf.Lerp(m_camera.fieldOfView, 17.5f, Time.deltaTime * 8f);
+			transform.localPosition = Vector3.Lerp(transform.localPosition, m_acogSightPosition, Time.deltaTime * 8f);
+			m_camera.fieldOfView = Mathf.Lerp(m_camera.fieldOfView, 17.5f, Time.deltaTime * 8f);
 		}
 		else
             	{
-				transform.localPosition = Vector3.Lerp(transform.localPosition, m_aimPosition, Time.deltaTime * 8f);
-				m_camera.fieldOfView = Mathf.Lerp(m_camera.fieldOfView, 40f, Time.deltaTime * 8f);
+			transform.localPosition = Vector3.Lerp(transform.localPosition, m_aimPosition, Time.deltaTime * 8f);
+			m_camera.fieldOfView = Mathf.Lerp(m_camera.fieldOfView, 40f, Time.deltaTime * 8f);
 		}
         }
         else
@@ -348,132 +348,130 @@ public class Weapon_AKM : Weapon
         {
 		m_recoilVert += 0.15f;
 		m_recoilVert = Mathf.Clamp(m_recoilVert, 1.2f, 3f);
-
-			m_recoiltHoriz += 0.05f;
-			m_recoiltHoriz = Mathf.Clamp(m_recoiltHoriz, 0.4f, 0.8f);
+		m_recoiltHoriz += 0.05f;
+		m_recoiltHoriz = Mathf.Clamp(m_recoiltHoriz, 0.4f, 0.8f);
         }
 
-		RaycastHit hit;
+	RaycastHit hit;
 
-		int layerMask = ((1 << LayerMask.NameToLayer("Player")) | (1 << LayerMask.NameToLayer("Sfx")) | (1 << LayerMask.NameToLayer("Interactable")) | (1 << LayerMask.NameToLayer("Player_Throw")) | (1 << LayerMask.NameToLayer("Enemy_ExplosionHitCol")));
-		layerMask = ~layerMask;
+	int layerMask = ((1 << LayerMask.NameToLayer("Player")) | (1 << LayerMask.NameToLayer("Sfx")) | (1 << LayerMask.NameToLayer("Interactable")) | (1 << LayerMask.NameToLayer("Player_Throw")) | (1 << LayerMask.NameToLayer("Enemy_ExplosionHitCol")));
+	layerMask = ~layerMask;
 		
-		if (Physics.Raycast(m_shootPoint.position, m_shootPoint.transform.forward + Random.onUnitSphere * m_accuracy, out hit, m_range, layerMask))
+	if (Physics.Raycast(m_shootPoint.position, m_shootPoint.transform.forward + Random.onUnitSphere * m_accuracy, out hit, m_range, layerMask))
+	{
+		if (hit.collider.gameObject.layer == LayerMask.NameToLayer("Enemy"))
 		{
-			if (hit.collider.gameObject.layer == LayerMask.NameToLayer("Enemy"))
+			var blood = ObjPool.Instance.m_bloodPool.Get();
+
+			if (blood != null)
 			{
-				var blood = ObjPool.Instance.m_bloodPool.Get();
-
-				if (blood != null)
-				{
-					blood.gameObject.transform.position = hit.point;
-					blood.gameObject.transform.rotation = Quaternion.FromToRotation(Vector3.up, hit.normal);
-					blood.gameObject.SetActive(true);
-				}
-
-				Enemy_StateManager enemy = hit.transform.GetComponentInParent<Enemy_StateManager>();
-
-				if (enemy)
-				{
-					if (hit.collider.gameObject.CompareTag("HeadShot"))
-					{
-						SoundManager.Instance.Play2DSound(SoundManager.eAudioClip.HEADSHOT, 1.5f);
-						enemy.Damaged(m_power * 100f);
-					}
-					else
-					{
-						SoundManager.Instance.Play2DSound(SoundManager.eAudioClip.HITSOUND, 1.5f);
-						enemy.Damaged(m_power);
-					}
-				}
+				blood.gameObject.transform.position = hit.point;
+				blood.gameObject.transform.rotation = Quaternion.FromToRotation(Vector3.up, hit.normal);
+				blood.gameObject.SetActive(true);
 			}
-			else
+				
+			Enemy_StateManager enemy = hit.transform.GetComponentInParent<Enemy_StateManager>();
+
+			if (enemy)
 			{
-				var hitHole = ObjPool.Instance.m_hitHoleObjPool.Get();
-
-				if (hitHole != null)
+				if (hit.collider.gameObject.CompareTag("HeadShot"))
 				{
-					hitHole.gameObject.transform.position = hit.point;
-					hitHole.gameObject.transform.rotation = Quaternion.FromToRotation(Vector3.up, hit.normal);
-					hitHole.transform.SetParent(hit.transform); // 탄흔이 오브젝트를 따라가게끔 유도하기 위해 리턴되기 전까지만 부모로 지정
-					hitHole.gameObject.SetActive(true);
+					SoundManager.Instance.Play2DSound(SoundManager.eAudioClip.HEADSHOT, 1.5f);
+					enemy.Damaged(m_power * 100f);
 				}
-
-				var hitSpark = ObjPool.Instance.m_hitSparkPool.Get();
-
-				if (hitSpark != null)
+				else
 				{
-					hitSpark.gameObject.transform.position = hit.point;
-					hitSpark.gameObject.transform.rotation = Quaternion.FromToRotation(Vector3.up, hit.normal);
-					hitSpark.gameObject.SetActive(true);
-				}
-
-				if (hit.transform.gameObject.layer.Equals(LayerMask.NameToLayer("Movable")))
-				{
-					Rigidbody rig = hit.transform.GetComponent<Rigidbody>();
-
-					if (rig)
-					{
-						rig.AddForceAtPosition(m_shootPoint.forward * m_power * 70f, m_shootPoint.position);
-					}
+					SoundManager.Instance.Play2DSound(SoundManager.eAudioClip.HITSOUND, 1.5f);
+					enemy.Damaged(m_power);
 				}
 			}
 		}
+		else
+		{
+			var hitHole = ObjPool.Instance.m_hitHoleObjPool.Get();
 
-		m_currentBullets--;
-		m_fireTimer = 0.0f;
-		m_anim.CrossFadeInFixedTime("FIRE", 0.01f);
+			if (hitHole != null)
+			{
+				hitHole.gameObject.transform.position = hit.point;
+				hitHole.gameObject.transform.rotation = Quaternion.FromToRotation(Vector3.up, hit.normal);
+				hitHole.transform.SetParent(hit.transform); // 탄흔이 오브젝트를 따라가게끔 유도하기 위해 리턴되기 전까지만 부모로 지정
+				hitHole.gameObject.SetActive(true);
+			}
 
-		muzzleFlash.Play();
-		Recoil();
-		CasingEffect();
+			var hitSpark = ObjPool.Instance.m_hitSparkPool.Get();
+
+			if (hitSpark != null)
+			{
+				hitSpark.gameObject.transform.position = hit.point;
+				hitSpark.gameObject.transform.rotation = Quaternion.FromToRotation(Vector3.up, hit.normal);
+				hitSpark.gameObject.SetActive(true);
+			}
+
+			if (hit.transform.gameObject.layer.Equals(LayerMask.NameToLayer("Movable")))
+			{
+				Rigidbody rig = hit.transform.GetComponent<Rigidbody>();
+
+				if (rig)
+				{
+					rig.AddForceAtPosition(m_shootPoint.forward * m_power * 70f, m_shootPoint.position);
+				}
+			}
+		}
 	}
 
-	public override void StopFiring()
-	{
-		m_recoilVert = 1.2f;
-		m_recoiltHoriz = 0.65f;
-	}
+	m_currentBullets--;
+	m_fireTimer = 0.0f;
+	m_anim.CrossFadeInFixedTime("FIRE", 0.01f);
+
+	muzzleFlash.Play();
+	Recoil();
+	CasingEffect();
+    }
+
+    public override void StopFiring()
+    {
+	m_recoilVert = 1.2f;
+	m_recoiltHoriz = 0.65f;
+    }
 
     public override void Reload()
     {
-		if (m_currentBullets == m_bulletsPerMag || m_bulletsRemain == 0)
-		{
-			return;
-		}
-
-		SoundManager.Instance.Play2DSound_Play((int)SoundManager.eAudioClip.AKM_RELOAD, 1f);
-		m_anim.CrossFadeInFixedTime("RELOAD", 0.01f);
+	if (m_currentBullets == m_bulletsPerMag || m_bulletsRemain == 0)
+	{
+		return;
 	}
+
+	SoundManager.Instance.Play2DSound_Play((int)SoundManager.eAudioClip.AKM_RELOAD, 1f);
+	m_anim.CrossFadeInFixedTime("RELOAD", 0.01f);
+    }
 
     public override void ChangeSight()
     {
-		bool check = false;
-		int index = 0;
+	bool check = false;
+	int index = 0;
 
-		for(int i=0; i<m_sights.Length; i++)
+	for(int i=0; i<m_sights.Length; i++)
         {
-			if(m_sights[i].activeSelf)
+	    if(m_sights[i].activeSelf)
             {
-				check = true;
-				index = i;
-				break;
+		check = true;
+		index = i;
+		break;
             }
         }
 		
-		if(check)
+	if(check)
         {
-			m_sights[index].SetActive(false);
+	    m_sights[index].SetActive(false);
 			
-			if(index + 1 < m_sights.Length)
+	    if(index + 1 < m_sights.Length)
             {
-				m_sights[index + 1].SetActive(true);
-			}
-
+		m_sights[index + 1].SetActive(true);
+	    }
         }
-		else
+	else
         {
-			m_sights[index].SetActive(true);
+	    m_sights[index].SetActive(true);
         }
     }
     #endregion
@@ -481,24 +479,24 @@ public class Weapon_AKM : Weapon
     #region Public Methods
     public void ReloadComplete()
     {
-		int temp = 0;
+	int temp = 0;
 
-		temp = m_bulletsPerMag - m_currentBullets; //장전되어야 할 총알의 수
+	temp = m_bulletsPerMag - m_currentBullets; //장전되어야 할 총알의 수
 
-		if(temp >= m_bulletsRemain)
+	if(temp >= m_bulletsRemain)
         {
-			m_currentBullets += m_bulletsRemain;
-			m_bulletsRemain = 0;
+		m_currentBullets += m_bulletsRemain;
+		m_bulletsRemain = 0;
         }
-		else
+	else
         {
-			m_currentBullets += temp;
-			m_bulletsRemain -= temp;
+		m_currentBullets += temp;
+		m_bulletsRemain -= temp;
         }
 
-		UIManager.Instance.Update_Bullet(m_currentBullets, m_bulletsRemain);
-	}
-	#endregion
+	UIManager.Instance.Update_Bullet(m_currentBullets, m_bulletsRemain);
+    }
+    #endregion
 }
 ```
 
