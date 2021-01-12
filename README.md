@@ -86,6 +86,64 @@ public abstract class Weapon : MonoBehaviour
 	public abstract void Reload(); //재장전
 	#endregion
 
+	#region Protected Methods
+	protected void Recoil() //반동
+	{
+		Vector3 HorizonCamRecoil = new Vector3(0f, Random.Range(-m_recoiltHoriz, m_recoiltHoriz), 0f);
+		Vector3 VerticalCamRecoil = new Vector3(-m_recoilVert, 0f, 0f);
+
+		if (!m_isAiming)
+		{
+			Vector3 gunRecoil = new Vector3(Random.Range(-m_recoilKickBack.x, m_recoilKickBack.x), m_recoilKickBack.y, m_recoilKickBack.z);
+			//총기가 뒤로 밀리는 반동
+			transform.localPosition = Vector3.Lerp(transform.localPosition, transform.localPosition + gunRecoil, m_recoilAmount);
+			//수평반동
+			m_horizonCamRecoil.transform.localRotation = Quaternion.Slerp(m_horizonCamRecoil.transform.localRotation, Quaternion.Euler(m_horizonCamRecoil.transform.localEulerAngles + HorizonCamRecoil), m_recoilAmount);
+			//수직반동
+			m_cameraRotate.VerticalCamRotate(-VerticalCamRecoil.x);
+		}
+		else
+		{
+			Vector3 gunRecoil = new Vector3(Random.Range(-m_recoilKickBack.x, m_recoilKickBack.x) / 2f, 0, m_recoilKickBack.z);
+			//총기가 뒤로 밀리는 반동
+			transform.localPosition = Vector3.Lerp(transform.localPosition, transform.localPosition + gunRecoil, m_recoilAmount);
+
+			//수평반동
+			m_horizonCamRecoil.transform.localRotation = Quaternion.Slerp(m_horizonCamRecoil.transform.localRotation, Quaternion.Euler(m_horizonCamRecoil.transform.localEulerAngles + HorizonCamRecoil / 1.5f), m_recoilAmount);
+			//수직반동
+			m_cameraRotate.VerticalCamRotate(-VerticalCamRecoil.x / 2f);
+		}
+	}
+
+	protected void RecoilBack() //수평반동 회복 -> Update문에서 호출
+	{
+		m_horizonCamRecoil.transform.localRotation = Quaternion.Slerp(m_horizonCamRecoil.transform.localRotation, Quaternion.Euler(0f, 0f, 0f), Time.deltaTime * 3f);
+	}
+
+	protected void CasingEffect() //탄피이펙트
+	{
+		//매번 랜덤한 각도로 튕겨져 나감.
+		Quaternion randomQuaternion = new Quaternion(Random.Range(0f, 360f), Random.Range(0f, 360f), Random.Range(0f, 360f), 1);
+		var casing = ObjPool.Instance.m_casingPool.Get(); //풀에서 탄피를 꺼냄.
+
+		if (casing != null)
+		{
+			casing.transform.SetParent(m_casingPoint);
+			casing.transform.localPosition = new Vector3(-1f, -3f, 0f);
+			casing.transform.localScale = new Vector3(23, 23, 23);
+			casing.transform.localRotation = Quaternion.identity;
+
+			var rigid = casing.gameObject.GetComponent<Rigidbody>();
+
+			rigid.isKinematic = false; //물리힘을 가하기 위해.
+			casing.gameObject.SetActive(true);
+			//매번 랜덤한 힘을 가해준다.
+			rigid.AddRelativeForce(new Vector3(Random.Range(50f, 100f), Random.Range(50f, 100f), Random.Range(-10f, 20f)));
+			rigid.MoveRotation(randomQuaternion.normalized);
+		}
+	}
+	#endregion
+	
 	#region Public Methods
 	public void AimIn() //정조준
 	{
@@ -161,64 +219,6 @@ public abstract class Weapon : MonoBehaviour
 			{
 				m_accuracy = m_originAccuracy;
 			}
-		}
-	}
-	#endregion
-
-	#region Protected Methods
-	protected void Recoil() //반동
-	{
-		Vector3 HorizonCamRecoil = new Vector3(0f, Random.Range(-m_recoiltHoriz, m_recoiltHoriz), 0f);
-		Vector3 VerticalCamRecoil = new Vector3(-m_recoilVert, 0f, 0f);
-
-		if (!m_isAiming)
-		{
-			Vector3 gunRecoil = new Vector3(Random.Range(-m_recoilKickBack.x, m_recoilKickBack.x), m_recoilKickBack.y, m_recoilKickBack.z);
-			//총기가 뒤로 밀리는 반동
-			transform.localPosition = Vector3.Lerp(transform.localPosition, transform.localPosition + gunRecoil, m_recoilAmount);
-			//수평반동
-			m_horizonCamRecoil.transform.localRotation = Quaternion.Slerp(m_horizonCamRecoil.transform.localRotation, Quaternion.Euler(m_horizonCamRecoil.transform.localEulerAngles + HorizonCamRecoil), m_recoilAmount);
-			//수직반동
-			m_cameraRotate.VerticalCamRotate(-VerticalCamRecoil.x);
-		}
-		else
-		{
-			Vector3 gunRecoil = new Vector3(Random.Range(-m_recoilKickBack.x, m_recoilKickBack.x) / 2f, 0, m_recoilKickBack.z);
-			//총기가 뒤로 밀리는 반동
-			transform.localPosition = Vector3.Lerp(transform.localPosition, transform.localPosition + gunRecoil, m_recoilAmount);
-
-			//수평반동
-			m_horizonCamRecoil.transform.localRotation = Quaternion.Slerp(m_horizonCamRecoil.transform.localRotation, Quaternion.Euler(m_horizonCamRecoil.transform.localEulerAngles + HorizonCamRecoil / 1.5f), m_recoilAmount);
-			//수직반동
-			m_cameraRotate.VerticalCamRotate(-VerticalCamRecoil.x / 2f);
-		}
-	}
-
-	protected void RecoilBack() //수평반동 회복 -> Update문에서 호출
-	{
-		m_horizonCamRecoil.transform.localRotation = Quaternion.Slerp(m_horizonCamRecoil.transform.localRotation, Quaternion.Euler(0f, 0f, 0f), Time.deltaTime * 3f);
-	}
-
-	protected void CasingEffect() //탄피이펙트
-	{
-		//매번 랜덤한 각도로 튕겨져 나감.
-		Quaternion randomQuaternion = new Quaternion(Random.Range(0f, 360f), Random.Range(0f, 360f), Random.Range(0f, 360f), 1);
-		var casing = ObjPool.Instance.m_casingPool.Get(); //풀에서 탄피를 꺼냄.
-
-		if (casing != null)
-		{
-			casing.transform.SetParent(m_casingPoint);
-			casing.transform.localPosition = new Vector3(-1f, -3f, 0f);
-			casing.transform.localScale = new Vector3(23, 23, 23);
-			casing.transform.localRotation = Quaternion.identity;
-
-			var rigid = casing.gameObject.GetComponent<Rigidbody>();
-
-			rigid.isKinematic = false; //물리힘을 가하기 위해.
-			casing.gameObject.SetActive(true);
-			//매번 랜덤한 힘을 가해준다.
-			rigid.AddRelativeForce(new Vector3(Random.Range(50f, 100f), Random.Range(50f, 100f), Random.Range(-10f, 20f)));
-			rigid.MoveRotation(randomQuaternion.normalized);
 		}
 	}
 	#endregion
@@ -581,7 +581,7 @@ public class ATW_Grenade : ATW
 
 **Explanation**:gun:<br>
 (구현설명은 주석으로 간단하게 처리했습니다!)<br>
-공통된 내용(필드나 메소드)들을 추출하여 통일된 내용으로 작성하도록 상위 클래스인 Weapon, ATW 추상클래스를 구현했습니다. 모든 총기 및 투척무기 클래스는 해당 추상클래스를 상속받아, 
+공통된 내용(필드나 메소드)들을 추출하고, 통일된 내용으로 작성하도록 상위 클래스인 Weapon, ATW 추상클래스를 구현했습니다. 모든 총기 및 투척무기 클래스는 해당 추상클래스를 상속받아, 
 각자 필요한 메소드나 필드만 추가로 정의하고, 추상 메소드를 오버라이딩하여 클래스마다 다르게 실행될 로직을 작성해 주면 됩니다. 이러한 구성을 통해서, 코드들을 규격화 할 수 있었고 
 아래와 같이 다형성 사용, 느슨한 결합 등을 이룰 수 있었습니다.
 
