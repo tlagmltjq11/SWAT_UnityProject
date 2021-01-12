@@ -726,6 +726,8 @@ public interface IFSMState<T> //각 상태들이 포함해야할 메소드를 �
 ```c#
 public class Enemy_StateManager : FSM<Enemy_StateManager> //상태매니저
 {
+    //상태들의 변수를 전부 매니저에 선언하는 이유는 상태들이 싱글턴이기 때문에 전역으로 관리되는데, 거기서 변수를 관리해버리면
+    //해당 상태를 사용하는 모든 유닛들의 변수값이 같이 바뀌게 되기 때문이다. 각자 유닛들의 매니저에서 변수를 관리해야하는것.
     #region Field
     public Animator m_anim;
     public GameObject m_player; //플레이어
