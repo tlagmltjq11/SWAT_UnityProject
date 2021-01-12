@@ -1462,6 +1462,8 @@ void Update()
 <summary>Managers Code 접기/펼치기</summary>
 <div markdown="1">
 
+<
+
 <details>
 <summary>&nbsp;&nbsp;&nbsp;&nbsp;SoundManager 접기/펼치기</summary>
 <div markdown="1">
@@ -1566,16 +1568,6 @@ public class SoundManager : SingletonMonoBehaviour<SoundManager> //싱글턴패�
         PlayerPrefs.SetFloat("BGMVolume", volume);
         PlayerPrefs.Save();
     }
-
-    public void BGMPlay() //BGM 재생
-    {
-        m_BGMSource.Play();
-    }
-
-    public void BGMPause() //BGM 중지
-    {
-        m_BGMSource.Pause();
-    }
     
     //오버로딩 eAudioClip
     public void Play2DSound(eAudioClip clip, float volume)
@@ -1620,7 +1612,7 @@ public class SoundManager : SingletonMonoBehaviour<SoundManager> //싱글턴패�
     //오버로딩 int
     public void Play3DSound(int clip, Vector3 pos, float maxDistance, float volume)
     {
-        var obj = ObjPool.Instance.m_audioPool.Get();
+        var obj = ObjPool.Instance.m_audioPool.Get(); //오브젝트 풀에서 3D오디오소스가 부착된 게임오브젝트를 꺼냄
 
         if (obj != null)
         {
@@ -1649,10 +1641,10 @@ public class SoundManager : SingletonMonoBehaviour<SoundManager> //싱글턴패�
             m_2DSoundSource_Play.Pause(); //재생 중지
             m_pausedAudios.Add(m_2DSoundSource_Play); //일시중지된 오디오소스 리스트에 추가
         }
-        if (m_BGMSource.isPlaying) 
+        if (m_BGMSource.isPlaying)  //재생중이라면
         {
-            m_BGMSource.Pause();
-            m_pausedAudios.Add(m_BGMSource);
+            m_BGMSource.Pause(); //재생 중지
+            m_pausedAudios.Add(m_BGMSource); //일시중지된 오디오소스 리스트에 추가
         }
 	
         //오브젝트풀 매니저 하위에 들어가 있는 3D오디오소스 오브젝트 중 활성화된, 즉 재생 중이던 것들만 가져옴.
