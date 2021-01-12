@@ -1428,7 +1428,7 @@ public class Hostage_Controller : MonoBehaviour
 </div>
 </details>
 
-**Explanation**:gun:<br>
+**Explanation**:wrench:<br>
 (구현설명은 주석으로 간단하게 처리했습니다!)<br>
 적 AI 같은 경우, 상태들을 클래스로 관리하는 FSM으로 구현했습니다. 각 상태들은 싱글턴패턴을 적용시켜 상태변환시마다 new, delete가 난무하는것을 예방함으로써, 오버헤드와 메모리 낭비를
 방지하고자 했습니다. 또한 각 상태들이 동일한 메소드(동작)를 포함하도록 강제하고, 다중상속 문제를 해결하며 다형성을 이용하기위해 IFSM 인터페이스를 구현하도록 했습니다. 
@@ -1436,6 +1436,25 @@ public class Hostage_Controller : MonoBehaviour
 또한, 구조가 심플하다보니 개발하는데 있어서 좀 더 수월해지는 이점도 존재했습니다.
 
 인질같은 경우 정말 간단한 상태만을 갖는 AI로 구현하면 됐기 때문에, 위처럼 개발하는것이 오히려 낭비라고 생각하여 한 class내에서 switch-case문으로 간단하게 구현하였습니다.
+
+```c#
+//FSM
+protected void  FSMUpdate() 
+{ 
+	if (m_currentState != null)
+	{
+		m_currentState.Execute(owner); //Interface로 인한 다형성
+	}
+}
+
+...
+
+//상태매니저
+void Update()
+{
+	FSMUpdate(); //현재 상태의 Execute() 실행
+}
+```
 
 </div>
 </details>
