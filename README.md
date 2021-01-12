@@ -1,4 +1,4 @@
-# V_Project
+# SWAT_Project
 프로젝트 설명은 아래 [링크](#1)를 통해 영상으로 확인할 수 있고, 코드와 같은 부가설명은 [About Dev](#2) 부분을 참고해주세요.<br>
 <br>
 
@@ -1455,6 +1455,12 @@ void Update()
 }
 ```
 
+</div>
+</details>
+
+<details>
+<summary>Managers Code 접기/펼치기</summary>
+<div markdown="1">
 </div>
 </details>
 
