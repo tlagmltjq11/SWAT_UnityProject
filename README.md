@@ -1462,7 +1462,7 @@ void Update()
 <summary>Managers Code 접기/펼치기</summary>
 <div markdown="1">
 
-<
+<br>
 
 <details>
 <summary>&nbsp;&nbsp;&nbsp;&nbsp;SoundManager 접기/펼치기</summary>
