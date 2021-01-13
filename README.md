@@ -1898,8 +1898,6 @@ GameManager<br>
 수행하게끔 구현했습니다.
 <br>
 
-
-
 </div>
 </details>
 
