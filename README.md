@@ -1349,7 +1349,7 @@ public class Hostage_Controller : MonoBehaviour
                 if (m_info.IsName("Hostage_IDLE")) //만약 구출 애니메이션 작동이 끝나고, IDLE 애니메이션으로 넘어간 상태일 경우
                 {
                     GameManager.Instance.AddScore(500); //500점 추가.
-                    GameManager.Instance.HostageRescued(); //탈출 시 만나게될 새로운 적들을 활성화시키고, SafeZone 파티클시스템을 활성화시켜줌.
+                    GameManager.Instance.ActiveNextWave(); //탈출 시 만나게될 새로운 적들을 활성화시키고, SafeZone 파티클시스템을 활성화시켜줌.
                     m_state = eState.IDLE; //IDLE상태로 변경
                 }
                 break;
@@ -1674,9 +1674,231 @@ public class SoundManager : SingletonMonoBehaviour<SoundManager> //싱글턴패�
 </div>
 </details>
 
+<details>
+<summary>&nbsp;&nbsp;&nbsp;&nbsp;GameManager 접기/펼치기</summary>
+<div markdown="1">
+
+```c#
+public class GameManager : SingletonMonoBehaviour<GameManager>
+{
+    #region Field
+    public enum eGameState //게임의 현재상태들.
+    {
+        Normal, //일반
+        Pause, //일시중지
+        PlayerDead, //플레이어사망
+        Success, //미션성공
+        Max
+    }
+
+    eGameState m_state; //게임의 현재상태
+    [SerializeField]
+    GameObject m_player; //플레이어
+    [SerializeField]
+    GameObject m_camera; //플레이어 카메라
+    [SerializeField]
+    GameObject m_WaitBox; //게임시작 전 대기장소
+    GameObject m_failViewCam; //플레이어 사망 시 비춰줄 카메라
+    Vector3 FailViewPosition;
+    Player_StateManager m_playScr; //플레이어 컨트롤러
+    CameraRotate m_camScr; //화면 컨트롤러
+    WeaponSway m_sway; //총의 흔들림 즉 Sway 스크립트
+    bool m_isStart; //게임이 시작된 상태인지
+
+    int m_time; //타이머
+    int m_score; //점수
+    public GameObject[] m_wave2Enemys; //인질 구출 후 새로 활성화 될 적들
+    public GameObject m_RescuePoint; //인질 구출 지점
+    #endregion
+
+    #region Unity Methods
+    protected override void OnStart()
+    {
+        m_isStart = false;
+
+        Cursor.lockState = CursorLockMode.Locked;
+        Cursor.visible = false; //커서를 감춘다.
+
+        m_playScr = m_player.GetComponent<Player_StateManager>();
+        m_camScr = m_camera.GetComponent<CameraRotate>();
+        m_sway = m_player.GetComponentInChildren<WeaponSway>();
+
+        m_time = 0;
+        m_score = 0;
+
+        Time.timeScale = 1;
+    }
+
+    void Update()
+    {
+        if(Input.GetKeyDown(KeyCode.Escape) && m_isStart && m_state != eGameState.PlayerDead) //게임도중 ESC를 눌렀을 시 timescale을 이용해 일시정지 해준다.
+        {
+            if (Time.timeScale == 0)
+            {
+                SetState(eGameState.Normal);
+                Time.timeScale = 1;
+            }
+            else
+            {
+                SetState(eGameState.Pause);
+                Time.timeScale = 0;
+            }
+        }
+    }
+    #endregion
+
+    #region Public Methods
+
+    public void HoldPlayer() //플레이어 행동 불가
+    {
+        m_playScr.enabled = false; //움직이지 못하고
+        m_camScr.enabled = false; //화면을 돌리지 못하며
+        m_sway.enabled = false; //총기도 움직이지 않는다.
+    }
+
+    public void ReleasePlayer() //플레이어 행동 가능
+    {
+        m_playScr.enabled = true;
+        m_camScr.enabled = true;
+        m_sway.enabled = true;
+    }
+
+    public void ActiveNextWave() //인질 구출 시 다음 wave 적들을 활성화 시켜주고, 구출포인트를 활성화
+    {
+        foreach (GameObject obj in m_wave2Enemys)
+        {
+            obj.SetActive(true); //적 활성화
+        }
+
+        m_RescuePoint.SetActive(true); //구출지점 활성화
+    }
+
+    public void GameStart() //게임 시작
+    {
+        m_isStart = true;
+        m_WaitBox.SetActive(false);
+        StartCoroutine("Timer"); //타이머 start
+    }
+    
+    public bool GetIsStart() //게임이 시작된 상태인지 반환
+    {
+        return m_isStart;
+    }
+
+    public void AddScore(int score) //해당 게임의 점수를 더해준다.
+    {
+        m_score += score;
+    }
+
+    public eGameState GetState() //현재 게임 상태 반환
+    {
+        return m_state;
+    }
+
+    public void SetState(eGameState state) //현재 게임 상태 지정
+    {
+        if (m_state == state) //같은 상태로 지정한다면 return
+        {
+            return;
+        }
+
+        m_state = state;
+
+        switch (m_state) //지정된 상태에 맞게 처리
+        {
+            case eGameState.Normal: //일반 상태
+                Cursor.lockState = CursorLockMode.Locked; //커서를 화면중앙에 위치시키고 고정
+                Cursor.visible = false; //커서 감추기
+                ReleasePlayer(); //플레이어 행동 가능
+                SoundManager.Instance.ReStartSound(); //중지되었던 사운드들 다시 재생
+                UIManager.Instance.CloseMenu(); //메뉴 닫아주기
+                break;
+
+            case eGameState.Pause: //일시중지 상태
+                Cursor.lockState = CursorLockMode.None; //잠금해제
+                Cursor.visible = true; //커서 보여주기
+                HoldPlayer(); //플레이어 행동 불가
+                SoundManager.Instance.StopSound(); //재생중이던 사운드들 일시 중지
+                UIManager.Instance.OpenMenu(); //메뉴 열어주기
+                break;
+
+            case eGameState.PlayerDead: //플레이어 사망 상태
+                StopCoroutine("Timer"); //타이머 중단
+                UIManager.Instance.GameResult(false, m_time, m_score); //게임 결과 화면 활성화 -> 시간과 점수를 넘겨줌
+                StartCoroutine("FailView"); //플레이어 사망 시 카메라 뷰 
+                m_player.gameObject.SetActive(false); //플레이어를 비활성화
+                break;
+
+            case eGameState.Success: //미션 성공 상태
+                StopCoroutine("Timer"); //타이머 중단
+                UIManager.Instance.CloseMenu(); //혹시 켜져있을 메뉴 닫아주기
+                UIManager.Instance.GameResult(true, m_time, m_score); //게임 결과 화면 활성화 -> 시간과 점수를 넘겨줌
+                Cursor.lockState = CursorLockMode.None; //커서 잠금해제
+                Cursor.visible = true; //커서 보여주기
+		HoldPlayer(); //플레이어 행동 불가
+                m_player.layer = LayerMask.NameToLayer("Default"); //적들이 공격하지 못하도록 레이어를 일시적으로 변경
+                break;
+        }
+    }
+    #endregion
+
+    #region Coroutine
+    IEnumerator FailView() //플레이어 사망 시 카메라 View
+    {
+        m_failViewCam = new GameObject("FailViewCam"); //게임오브젝트 생성
+        m_failViewCam.gameObject.AddComponent<Camera>(); //카메라 컴포넌트 부착
+        m_failViewCam.gameObject.AddComponent<AudioListener>(); //오디오리스너 부착 -> 플레이어가 사망 할 시 비활성화 되기 때문에 오디오리스너가 존재하지않게됨.
+
+        m_failViewCam.gameObject.transform.position = m_camera.transform.position; //플레이어 카메라 위치로 이동
+        m_failViewCam.gameObject.transform.eulerAngles = new Vector3(0f, m_camera.transform.eulerAngles.y, 0f); //플레이어가 바라보던 각도로 설정
+
+	//최종포지션
+        FailViewPosition = new Vector3(m_failViewCam.transform.position.x, m_failViewCam.transform.position.y + 2f, m_failViewCam.transform.position.z);
+
+        while (true)
+        {
+	    //보간을 이용해서 부드럽게 플레이어의 몸체를 바라보도록 회전
+            m_failViewCam.transform.rotation = Quaternion.Slerp(m_failViewCam.transform.rotation, Quaternion.Euler(90f, m_failViewCam.transform.eulerAngles.y, 0f), Time.deltaTime * 3f);
+	    //몸체를 위에서 내려다 볼 수 있게 포지션 이동
+            m_failViewCam.transform.position = Vector3.Lerp(m_failViewCam.transform.position, FailViewPosition, Time.deltaTime * 2f);
+            yield return null;
+		
+	    //최종포지션에 도착했다면 코루틴 중지
+            if(m_failViewCam.transform.position == FailViewPosition)
+            {
+                yield break;
+            }
+        }
+    }
+
+    IEnumerator Timer() //타이머
+    {
+        while(true)
+        {
+            yield return new WaitForSeconds(1f);
+
+            m_time++;
+        }
+    }
+
+    #endregion
+}
+```
+
+</div>
+</details>
+
 **Explanation**:wrench:<br>
 (구현설명은 주석으로 간단하게 처리했습니다!)<br>
-싱글턴패턴을 적용한 SoundManager 같은 경우 모든 사운드클립 및 오디오소스를 관리하며 재생 및 중단을 수행하게끔 정리했습니다. 이를 통해 사운드 재생이 필요한 곳에서 쉽게 참조하여 간편하게 사용할 수 있었으며, 난무하는 오디오소스 컴포넌트를 방지할 수 있었습니다. 특히 3D사운드 재생에 관련해서는 생성, 삭제 과정의 오버헤드를 방지하기 위해 3D오디오소스를 부착한 오브젝트를 Object Pooling으로 관리하면서 사용합니다. 또한 오디오 과부하를 방지하기 위해 Object Pool에서도 최대로 생성될 수 있는 갯수를 제한해, 동시에 재생될 수 있는 3D오디오소스 수를 제한했습니다.
+SoundManager<br>
+싱글턴패턴을 적용한 SoundManager 같은 경우 모든 사운드클립 및 오디오소스를 관리하며 재생 및 중단을 수행하게끔 정리했습니다. 이를 통해 사운드 재생이 필요한 곳에서 쉽게 참조하여 간편하게 사용할 수 있었으며, 난무하는 오디오소스 컴포넌트를 방지할 수 있었습니다. 특히 3D사운드 재생에 관련해서는 생성, 삭제 과정의 오버헤드를 방지하기 위해 3D오디오소스를 부착한 오브젝트를 Object Pooling으로 관리하면서 사용합니다. 또한 오디오 과부하를 방지하기 위해 Object Pool에서 최대로 생성될 수 있는 갯수를 제한해, 동시에 재생될 수 있는 3D오디오소스 수를 제한했습니다.<br>
+
+GameManager<br>
+싱글턴패턴을 적용한 GameManager 같은 경우 현재 게임이 가질 수 있는 모든 상태를 열거형으로 나열한뒤, FSM 방식으로 한번에 하나의 상태만을 유지시키며 해당 상태에서 처리해야할 작업들을
+수행하게끔 구현했습니다.
+<br>
+
+
 
 </div>
 </details>
