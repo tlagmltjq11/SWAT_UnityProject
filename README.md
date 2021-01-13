@@ -1436,6 +1436,8 @@ public class Hostage_Controller : MonoBehaviour
 </div>
 </details>
 
+<br>
+
 **Explanation**:wrench:<br>
 (구현설명은 주석으로 간단하게 처리했습니다!)<br>
 적 AI 같은 경우, 상태들을 클래스로 관리하는 FSM으로 구현했습니다. 각 상태들은 싱글턴 패턴을 적용해 상태변환 시마다 new, delete가 난무하는 것을 예방함으로써, 오버헤드와 메모리 낭비를 방지하고자 했습니다. 또한 각 상태가 동일한 메소드(동작)를 포함하도록 강제하고, 다중상속 문제를 해결하며 다형성을 이용하기 위해 IFSM 인터페이스를 구현하도록 했습니다. 이러한 구조를 이용하니 클래스 간 느슨한 결합도를 유지할 수 있어서 Open-Closed Principle(확장에는 열리게 하고, 수정에는 닫히게 해야 한다는 객체지향 원칙)을 지킬 수 있었습니다. 또한, 구조가 심플하다 보니 개발하는 데 있어서 좀 더 수월해지는 이점도 존재했습니다.
@@ -1898,6 +1900,8 @@ public class GameManager : SingletonMonoBehaviour<GameManager>
 </div>
 </details>
 
+<br>
+
 **Explanation**:mortar_board:<br>
 (구현설명은 주석으로 간단하게 처리했습니다!)<br>
 <br>
@@ -1915,6 +1919,13 @@ public class GameManager : SingletonMonoBehaviour<GameManager>
 
 <br>
 
+<details>
+<summary>Player 계층구조 접기/펼치기</summary>
+<div markdown="1">
+</div>
+</details>
+
+<br>
 
 ### Difficult Point.:sweat_smile:
 * 
