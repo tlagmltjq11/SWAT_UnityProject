@@ -12,9 +12,6 @@ Irrational Games에서 개발한 택티컬 슈팅 게임 SWAT4를 모작한 프�
 <br>
 
 ### About Dev.:nut_and_bolt: <div id="2"></div>
-
-설명 드리고자 하는 부분들로만 추려냈습니다.<br>
-
 <br>
 
 <details>
