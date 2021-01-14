@@ -1923,7 +1923,9 @@ public class GameManager : SingletonMonoBehaviour<GameManager>
 <summary>Optimization 접기/펼치기</summary>
 <div markdown="1">
 
-**Explanation**:mortar_board:<br>
+<br>
+
+**Explanation**:scissors:<br>
 * LightMap을 사용해, 실시간 조명연산을 최소화 시키고자 했습니다.
 * Occlusion Culling을 이용하여, 렌더링 작업을 최적화 시키고자 했습니다.
 * Object Pooling 기법을 사용하여, 반복되는 생성-삭제 작업으로인한 GC의 잦은 호출을 방지했습니다.
