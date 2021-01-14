@@ -1920,12 +1920,17 @@ public class GameManager : SingletonMonoBehaviour<GameManager>
 <br>
 
 <details>
-<summary>Player 계층구조 접기/펼치기</summary>
+<summary>Optimization 접기/펼치기</summary>
 <div markdown="1">
 
-<img src="https://user-images.githubusercontent.com/43705434/104551604-860e1200-567a-11eb-8d49-b31296302be8.PNG" width="300" height="150">
-<img src="https://user-images.githubusercontent.com/43705434/104551607-86a6a880-567a-11eb-8c15-401c283daca3.PNG" width="300" height="300">
-	
+**Explanation**:mortar_board:<br>
+* LightMap을 사용해, 실시간 조명연산을 최소화 시키고자 했습니다.
+* Occlusion Culling을 이용하여, 렌더링 작업을 최적화 시키고자 했습니다.
+* Object Pooling 기법을 사용하여, 반복되는 생성-삭제 작업으로인한 GC의 잦은 호출을 방지했습니다.
+* Atlas를 사용하여 드로우콜을 낮추고자 했습니다.
+
+<br>
+
 </div>
 </details>
 
