@@ -1923,6 +1923,7 @@ public class GameManager : SingletonMonoBehaviour<GameManager>
 <summary>Player 계층구조 접기/펼치기</summary>
 <div markdown="1">
 
+<img src="https://user-images.githubusercontent.com/43705434/104551604-860e1200-567a-11eb-8d49-b31296302be8.PNG" width="300" height="300">
 ![Player_1](https://user-images.githubusercontent.com/43705434/104551604-860e1200-567a-11eb-8d49-b31296302be8.PNG){: width="100" height="100"}
 ![Player_2](https://user-images.githubusercontent.com/43705434/104551607-86a6a880-567a-11eb-8c15-401c283daca3.PNG){: width="300" height="300"}
 	
