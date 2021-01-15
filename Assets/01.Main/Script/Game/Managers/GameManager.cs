@@ -86,7 +86,7 @@ public class GameManager : SingletonMonoBehaviour<GameManager>
         m_sway.enabled = true;
     }
 
-    public void HostageRescued()
+    public void ActiveNextWave()
     {
         foreach (GameObject obj in m_wave2Enemys)
         {
@@ -101,6 +101,11 @@ public class GameManager : SingletonMonoBehaviour<GameManager>
         m_isStart = true;
         m_WaitBox.SetActive(false);
         StartCoroutine("Timer");
+    }
+
+    public bool GetIsStart()
+    {
+        return m_isStart;
     }
 
     public void AddScore(int score)
@@ -153,19 +158,10 @@ public class GameManager : SingletonMonoBehaviour<GameManager>
                 UIManager.Instance.GameResult(true, m_time, m_score);
                 Cursor.lockState = CursorLockMode.None;
                 Cursor.visible = true;
-                m_playScr.enabled = false;
-                m_camScr.enabled = false;
-                m_sway.enabled = false;
+                HoldPlayer();
                 m_player.layer = LayerMask.NameToLayer("Default"); //적들이 공격하지 못하도록 레이어를 일시적으로 변경
                 break;
         }
-    }
-    #endregion
-
-    #region Private Methods
-    public bool GetIsStart()
-    {
-        return m_isStart;
     }
     #endregion
 

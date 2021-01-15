@@ -69,7 +69,7 @@ public class Hostage_Controller : MonoBehaviour
                 if (m_info.IsName("Hostage_IDLE"))
                 {
                     GameManager.Instance.AddScore(500);
-                    GameManager.Instance.HostageRescued();
+                    GameManager.Instance.ActiveNextWave();
                     m_state = eState.IDLE;
                 }
                 break;

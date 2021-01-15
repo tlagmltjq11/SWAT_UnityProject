@@ -28189,13 +28189,10 @@ MonoBehaviour:
   m_2DSoundSource: {fileID: 471222414}
   m_2DSoundSource_Play: {fileID: 471222412}
   m_BGMSource: {fileID: 471222416}
-  m_3dObj: {fileID: 254847773}
+  m_objPoolManager: {fileID: 254847773}
   m_helicopter: {fileID: 1276253836}
   m_policeCar: {fileID: 1467152345}
   m_audioMixer: {fileID: 24100000, guid: b4755cf01f331084682254fd0979c6c1, type: 2}
-  m_effectAudioSlider: {fileID: 1504550261}
-  m_bgmAudioSlider: {fileID: 963638410}
-  m_totalVolume: 1
 --- !u!82 &471222416
 AudioSource:
   m_ObjectHideFlags: 0

@@ -6,22 +6,31 @@ using UnityEngine.UI;
 
 public class LoadSceneManager : MonoBehaviour
 {
+    #region Static Field
     static string m_nextScene;
+    #endregion
 
+    #region Field
     [SerializeField]
     Image m_progressBar;
+    #endregion
 
+    #region Unity Methods
+    private void Start()
+    {
+        StartCoroutine(LoadSceneProgress());
+    }
+    #endregion
+
+    #region Static Methods
     public static void LoadScene(string sceneName)
     {
         m_nextScene = sceneName;
         SceneManager.LoadScene("Loading");
     }
+    #endregion
 
-    private void Start()
-    {
-        StartCoroutine(LoadSceneProgress());
-    }
-
+    #region Coroutine
     IEnumerator LoadSceneProgress()
     {
         AsyncOperation op = SceneManager.LoadSceneAsync(m_nextScene);
@@ -50,5 +59,6 @@ public class LoadSceneManager : MonoBehaviour
             }
         }
     }
+    #endregion
 }
 

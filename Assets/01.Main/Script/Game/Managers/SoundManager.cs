@@ -58,27 +58,23 @@ public class SoundManager : SingletonMonoBehaviour<SoundManager>
     [SerializeField]
     AudioSource m_BGMSource;
     [SerializeField]
-    GameObject m_3dObj;
+    GameObject m_objPoolManager; //오브젝트풀 매니저 하위에 모든 풀링 오브젝트들이 들어가있음.
     [SerializeField]
     AudioSource m_helicopter;
     [SerializeField]
     AudioSource m_policeCar;
     [SerializeField]
     AudioMixer m_audioMixer;
-    [SerializeField]
-    Slider m_effectAudioSlider;
-    [SerializeField]
-    Slider m_bgmAudioSlider;
     List<AudioSource> m_pausedAudios = new List<AudioSource>();
-    public float m_totalVolume = 1f;
-
     #endregion
 
-    private void Start()
+    #region Unity Methods
+    void Start()
     {
         BGMAudioControl(PlayerPrefs.GetFloat("BGMVolume"));
         EffectAudioControl(PlayerPrefs.GetFloat("SFXVolume"));
     }
+    #endregion
 
     #region Public Methods
     public void EffectAudioControl(float volume)
@@ -111,32 +107,22 @@ public class SoundManager : SingletonMonoBehaviour<SoundManager>
         PlayerPrefs.Save();
     }
 
-    public void BGMPlay()
-    {
-        m_BGMSource.Play();
-    }
-
-    public void BGMPause()
-    {
-        m_BGMSource.Pause();
-    }
-
     //PlayOneShot Method 사용
     public void Play2DSound(eAudioClip clip, float volume)
     {
-        m_2DSoundSource.PlayOneShot(m_clips[(int)clip], volume * m_totalVolume);
+        m_2DSoundSource.PlayOneShot(m_clips[(int)clip], volume);
     }
 
     public void Play2DSound(int clip, float volume)
     {
-        m_2DSoundSource.PlayOneShot(m_clips[clip], volume * m_totalVolume);
+        m_2DSoundSource.PlayOneShot(m_clips[clip], volume);
     }
 
     //Play Method 사용
     public void Play2DSound_Play(int clip, float volume)
     {
         m_2DSoundSource_Play.clip = m_clips[clip];
-        m_2DSoundSource_Play.volume = volume * m_totalVolume;
+        m_2DSoundSource_Play.volume = volume;
         m_2DSoundSource_Play.Play();
     }
 
@@ -186,8 +172,6 @@ public class SoundManager : SingletonMonoBehaviour<SoundManager>
 
     public void StopSound()
     {
-        BGMPause();
-
         if (m_2DSoundSource.isPlaying)
         {
             m_2DSoundSource.Pause();
@@ -208,35 +192,28 @@ public class SoundManager : SingletonMonoBehaviour<SoundManager>
         m_policeCar.Pause();
 
         //3d오브젝트풀링 오디오소스들 현재 재생중인것들만 처리중
-        var sources = m_3dObj.GetComponentsInChildren<AudioSource>();
+        var sources = m_objPoolManager.GetComponentsInChildren<AudioSource>();
 
         foreach(AudioSource audio in sources)
         {
             audio.Pause();
+            m_pausedAudios.Add(audio);
         }
     }
 
     public void ReStartSound()
-    {
-        BGMPlay();
-
+    { 
         //퍼지된 오디오소스만 리스트에 저장해두었다가 재생시킴.
         for (int i=0; i<m_pausedAudios.Count; i++)
         {
-            m_pausedAudios[0].Play();
+            m_pausedAudios[i].Play();
         }
+
         m_pausedAudios.Clear(); //클리어
 
         m_helicopter.Play();
         m_policeCar.Play();
-
-        //3d오브젝트풀링 오디오소스들 현재 재생중인것들만 처리중
-        var sources = m_3dObj.GetComponentsInChildren<AudioSource>();
-
-        foreach (AudioSource audio in sources)
-        {
-            audio.Play();
-        }
     }
+
     #endregion
 }
