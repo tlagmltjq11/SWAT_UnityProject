@@ -12,6 +12,8 @@ Irrational Games에서 개발한 택티컬 슈팅 게임 SWAT4를 모작한 프�
 <br>
 
 ### About Dev.:nut_and_bolt: <div id="2"></div>
+<br>
+
 <details>
 <summary>무기관련 Code 접기/펼치기</summary>
 <div markdown="1">
@@ -618,6 +620,7 @@ public ATW m_currentATW; //현재 투척무기
 </div>
 </details>
 
+<br>
 
 <details>
 <summary>FSM Code 접기/펼치기</summary>
@@ -1349,7 +1352,7 @@ public class Hostage_Controller : MonoBehaviour
                 if (m_info.IsName("Hostage_IDLE")) //만약 구출 애니메이션 작동이 끝나고, IDLE 애니메이션으로 넘어간 상태일 경우
                 {
                     GameManager.Instance.AddScore(500); //500점 추가.
-                    GameManager.Instance.HostageRescued(); //탈출 시 만나게될 새로운 적들을 활성화시키고, SafeZone 파티클시스템을 활성화시켜줌.
+                    GameManager.Instance.ActiveNextWave(); //탈출 시 만나게될 새로운 적들을 활성화시키고, SafeZone 파티클시스템을 활성화시켜줌.
                     m_state = eState.IDLE; //IDLE상태로 변경
                 }
                 break;
@@ -1430,6 +1433,8 @@ public class Hostage_Controller : MonoBehaviour
 </div>
 </details>
 
+<br>
+
 **Explanation**:wrench:<br>
 (구현설명은 주석으로 간단하게 처리했습니다!)<br>
 적 AI 같은 경우, 상태들을 클래스로 관리하는 FSM으로 구현했습니다. 각 상태들은 싱글턴 패턴을 적용해 상태변환 시마다 new, delete가 난무하는 것을 예방함으로써, 오버헤드와 메모리 낭비를 방지하고자 했습니다. 또한 각 상태가 동일한 메소드(동작)를 포함하도록 강제하고, 다중상속 문제를 해결하며 다형성을 이용하기 위해 IFSM 인터페이스를 구현하도록 했습니다. 이러한 구조를 이용하니 클래스 간 느슨한 결합도를 유지할 수 있어서 Open-Closed Principle(확장에는 열리게 하고, 수정에는 닫히게 해야 한다는 객체지향 원칙)을 지킬 수 있었습니다. 또한, 구조가 심플하다 보니 개발하는 데 있어서 좀 더 수월해지는 이점도 존재했습니다.
@@ -1458,21 +1463,486 @@ void Update()
 </div>
 </details>
 
+<br>
+
 <details>
 <summary>Managers Code 접기/펼치기</summary>
 <div markdown="1">
+
+<br>
+
+<details>
+<summary>&nbsp;&nbsp;&nbsp;&nbsp;SoundManager 접기/펼치기</summary>
+<div markdown="1">
+
+```c#
+public class SoundManager : SingletonMonoBehaviour<SoundManager> //싱글턴패턴 
+{
+    #region Field
+    public enum eAudioClip
+    {
+        FOOTSTEP1,
+        FOOTSTEP2,
+        FOOTSTEP3,
+        FOOTSTEP4,
+        JUMP,
+        LAND,
+        AKM_SHOOT,
+        M4_SHOOT,
+        GLOCK_SHOOT,
+        AKM_DRAW,
+        GLOCK_DRAW,
+        AKM_RELOAD,
+        GLOCK_RELOAD,
+        AIM_IN,
+        GRUNT1,
+        GRUNT2,
+        GRUNT3,
+        GRUNT4,
+        ENEMY_DEATH1,
+        ENEMY_DEATH2,
+        ENEMY_DEATH3,
+        HITSOUND,
+        HEADSHOT,
+        SUPPLY,
+        PLAYER_DEATH,
+        M4_RELOAD,
+        ATW_EXPLOSION1,
+        ATW_EXPLOSION2,
+        ATW_IMPACTONTGROUND,
+        ATW_THROW,
+        SUPPLYBOX_OPEN,
+        SUPPLYBOX_CLOSE,
+        ATW_CHANGE,
+        HEALTH_SUPPLY,
+        UNTIE_HOSTAGE,
+        FLASH_ON,
+        FLASH_OFF,
+        BUTTON,
+        MAX
+    }
+
+    [SerializeField]
+    AudioClip[] m_clips; //오디오 클립들
+    [SerializeField]
+    AudioSource m_2DSoundSource; //PlayOneShot Method 전용
+    [SerializeField] 
+    AudioSource m_2DSoundSource_Play; //Play Method 전용
+    [SerializeField]
+    AudioSource m_BGMSource;
+    [SerializeField]
+    GameObject m_objPoolManager; //오브젝트풀 매니저 하위에 모든 풀링 오브젝트들이 들어가있음.
+    [SerializeField]
+    AudioMixer m_audioMixer; //볼륨관리를 위한 오디오믹서
+    List<AudioSource> m_pausedAudios = new List<AudioSource>(); //일시중지된 오디오소스들을 담아놓는 리스트.
+    #endregion
+
+    #region Unity Methods
+    void Start()
+    {
+        BGMAudioControl(PlayerPrefs.GetFloat("BGMVolume")); //PlayerPrefs에 저장된 볼륨크기로 초기화
+        EffectAudioControl(PlayerPrefs.GetFloat("SFXVolume")); //PlayerPrefs에 저장된 볼륨크기로 초기화
+    }
+    #endregion
+
+    #region Public Methods
+    public void EffectAudioControl(float volume) //UI슬라이더에 연결된 메소드 -> Effect 볼륨조절
+    {
+        if(volume == -40f)
+        {
+            m_audioMixer.SetFloat("SFXVolume", -80); //Mute 해주기위함
+        }
+        else
+        {
+            m_audioMixer.SetFloat("SFXVolume", volume);
+        }
+
+        PlayerPrefs.SetFloat("SFXVolume", volume);
+        PlayerPrefs.Save();
+    }
+
+    public void BGMAudioControl(float volume) //UI슬라이더에 연결된 메소드 -> BGM 볼륨조절
+    {
+        if (volume == -40f)
+        {
+            m_audioMixer.SetFloat("BGMVolume", -80); //Mute 해주기위함
+        }
+        else
+        {
+            m_audioMixer.SetFloat("BGMVolume", volume);
+        }
+
+        PlayerPrefs.SetFloat("BGMVolume", volume);
+        PlayerPrefs.Save();
+    }
+    
+    //오버로딩 eAudioClip
+    public void Play2DSound(eAudioClip clip, float volume)
+    {
+        m_2DSoundSource.PlayOneShot(m_clips[(int)clip], volume);
+    }
+
+    //오버로딩 int
+    public void Play2DSound(int clip, float volume)
+    {
+        m_2DSoundSource.PlayOneShot(m_clips[clip], volume);
+    }
+
+    //Play Method 전용 -> Reload, Draw 를 연달아서 실행할 경우 사운드가 끊기게 하기 위함.(중복재생방지)
+    public void Play2DSound_Play(int clip, float volume)
+    {
+        m_2DSoundSource_Play.clip = m_clips[clip];
+        m_2DSoundSource_Play.volume = volume;
+        m_2DSoundSource_Play.Play();
+    }
+
+    //3D 사운드 재생
+    public void Play3DSound(eAudioClip clip, Vector3 pos, float maxDistance, float volume)
+    {
+        var obj = ObjPool.Instance.m_audioPool.Get(); //오브젝트 풀에서 3D오디오소스가 부착된 게임오브젝트를 꺼냄.
+
+        if (obj != null)
+        {
+            AudioSource audio = obj.gameObject.GetComponent<AudioSource>(); //오디오소스 Get
+            audio.priority = 128;
+            audio.clip = m_clips[(int)clip]; //클립 지정
+
+            obj.transform.position = pos; //재생시킬 위치 지정
+            audio.maxDistance = maxDistance; //최대거리 
+
+            obj.gameObject.SetActive(true); //오브젝트를 활성화
+            audio.Play(); //재생
+            obj.ReturnInvoke(m_clips[(int)clip].length); //오디오 클립의 길이만큼 대기 후 풀에 반환.
+        }
+    }
+
+    //오버로딩 int
+    public void Play3DSound(int clip, Vector3 pos, float maxDistance, float volume)
+    {
+        var obj = ObjPool.Instance.m_audioPool.Get(); //오브젝트 풀에서 3D오디오소스가 부착된 게임오브젝트를 꺼냄
+
+        if (obj != null)
+        {
+            AudioSource audio = obj.gameObject.GetComponent<AudioSource>(); //오디오소스 Get
+            audio.priority = 128;
+            audio.clip = m_clips[clip];  //클립 지정
+
+            obj.transform.position = pos; //재생시킬 위치 지정
+            audio.maxDistance = maxDistance; //최대거리
+
+            obj.gameObject.SetActive(true); //오브젝트를 활성화
+            audio.Play(); //재생
+            obj.ReturnInvoke(m_clips[clip].length); //오디오 클립의 길이만큼 대기 후 풀에 반환.
+        }
+    }
+    
+    public void StopSound() //TimeScale == 0 일 경우 재생중이던 모든 오디오 중지.
+    {
+        if (m_2DSoundSource.isPlaying) //재생중이라면
+        {
+            m_2DSoundSource.Pause(); //재생 중지
+            m_pausedAudios.Add(m_2DSoundSource); //일시중지된 오디오소스 리스트에 추가
+        }
+        if (m_2DSoundSource_Play.isPlaying) //재생중이라면
+        {
+            m_2DSoundSource_Play.Pause(); //재생 중지
+            m_pausedAudios.Add(m_2DSoundSource_Play); //일시중지된 오디오소스 리스트에 추가
+        }
+        if (m_BGMSource.isPlaying)  //재생중이라면
+        {
+            m_BGMSource.Pause(); //재생 중지
+            m_pausedAudios.Add(m_BGMSource); //일시중지된 오디오소스 리스트에 추가
+        }
+	
+        //오브젝트풀 매니저 하위에 들어가 있는 3D오디오소스 오브젝트 중 활성화된, 즉 재생 중이던 것들만 가져옴.
+        var sources = m_objPoolManager.GetComponentsInChildren<AudioSource>();
+
+        foreach(AudioSource audio in sources)
+        {
+            audio.Pause(); //일시중지
+	    m_pausedAudios.Add(audio); //일시중지된 오디오소스 리스트에 추가
+        }
+    }
+
+    public void ReStartSound() //TimeScale == 1 일 경우 일시중지되었던 모든 오디오를 다시 재생시켜준다.
+    {
+        //퍼지된 오디오소스만 리스트에 저장해두었다가 재생시킴.
+        for (int i=0; i<m_pausedAudios.Count; i++)
+        {
+            m_pausedAudios[i].Play();
+        }
+	
+        m_pausedAudios.Clear(); //클리어
+    }
+    #endregion
+}
+```
+
 </div>
 </details>
 
 <br>
 
+<details>
+<summary>&nbsp;&nbsp;&nbsp;&nbsp;GameManager 접기/펼치기</summary>
+<div markdown="1">
 
-### Difficult Point.:sweat_smile:
-* 
+```c#
+public class GameManager : SingletonMonoBehaviour<GameManager>
+{
+    #region Field
+    public enum eGameState //게임의 현재상태들.
+    {
+        Normal, //일반
+        Pause, //일시중지
+        PlayerDead, //플레이어사망
+        Success, //미션성공
+        Max
+    }
+
+    eGameState m_state; //게임의 현재상태
+    [SerializeField]
+    GameObject m_player; //플레이어
+    [SerializeField]
+    GameObject m_camera; //플레이어 카메라
+    [SerializeField]
+    GameObject m_WaitBox; //게임시작 전 대기장소
+    GameObject m_failViewCam; //플레이어 사망 시 비춰줄 카메라
+    Vector3 FailViewPosition;
+    Player_StateManager m_playScr; //플레이어 컨트롤러
+    CameraRotate m_camScr; //화면 컨트롤러
+    WeaponSway m_sway; //총의 흔들림 즉 Sway 스크립트
+    bool m_isStart; //게임이 시작된 상태인지
+
+    int m_time; //타이머
+    int m_score; //점수
+    public GameObject[] m_wave2Enemys; //인질 구출 후 새로 활성화 될 적들
+    public GameObject m_RescuePoint; //인질 구출 지점
+    #endregion
+
+    #region Unity Methods
+    protected override void OnStart()
+    {
+        m_isStart = false;
+
+        Cursor.lockState = CursorLockMode.Locked;
+        Cursor.visible = false; //커서를 감춘다.
+
+        m_playScr = m_player.GetComponent<Player_StateManager>();
+        m_camScr = m_camera.GetComponent<CameraRotate>();
+        m_sway = m_player.GetComponentInChildren<WeaponSway>();
+
+        m_time = 0;
+        m_score = 0;
+
+        Time.timeScale = 1;
+    }
+
+    void Update()
+    {
+        if(Input.GetKeyDown(KeyCode.Escape) && m_isStart && m_state != eGameState.PlayerDead) //게임도중 ESC를 눌렀을 시 timescale을 이용해 일시정지 해준다.
+        {
+            if (Time.timeScale == 0)
+            {
+                SetState(eGameState.Normal);
+                Time.timeScale = 1;
+            }
+            else
+            {
+                SetState(eGameState.Pause);
+                Time.timeScale = 0;
+            }
+        }
+    }
+    #endregion
+
+    #region Public Methods
+
+    public void HoldPlayer() //플레이어 행동 불가
+    {
+        m_playScr.enabled = false; //움직이지 못하고
+        m_camScr.enabled = false; //화면을 돌리지 못하며
+        m_sway.enabled = false; //총기도 움직이지 않는다.
+    }
+
+    public void ReleasePlayer() //플레이어 행동 가능
+    {
+        m_playScr.enabled = true;
+        m_camScr.enabled = true;
+        m_sway.enabled = true;
+    }
+
+    public void ActiveNextWave() //인질 구출 시 다음 wave 적들을 활성화 시켜주고, 구출포인트를 활성화
+    {
+        foreach (GameObject obj in m_wave2Enemys)
+        {
+            obj.SetActive(true); //적 활성화
+        }
+
+        m_RescuePoint.SetActive(true); //구출지점 활성화
+    }
+
+    public void GameStart() //게임 시작
+    {
+        m_isStart = true;
+        m_WaitBox.SetActive(false);
+        StartCoroutine("Timer"); //타이머 start
+    }
+    
+    public bool GetIsStart() //게임이 시작된 상태인지 반환
+    {
+        return m_isStart;
+    }
+
+    public void AddScore(int score) //해당 게임의 점수를 더해준다.
+    {
+        m_score += score;
+    }
+
+    public eGameState GetState() //현재 게임 상태 반환
+    {
+        return m_state;
+    }
+
+    public void SetState(eGameState state) //현재 게임 상태 지정
+    {
+        if (m_state == state) //같은 상태로 지정한다면 return
+        {
+            return;
+        }
+
+        m_state = state;
+
+        switch (m_state) //지정된 상태에 맞게 처리
+        {
+            case eGameState.Normal: //일반 상태
+                Cursor.lockState = CursorLockMode.Locked; //커서를 화면중앙에 위치시키고 고정
+                Cursor.visible = false; //커서 감추기
+                ReleasePlayer(); //플레이어 행동 가능
+                SoundManager.Instance.ReStartSound(); //중지되었던 사운드들 다시 재생
+                UIManager.Instance.CloseMenu(); //메뉴 닫아주기
+                break;
+
+            case eGameState.Pause: //일시중지 상태
+                Cursor.lockState = CursorLockMode.None; //잠금해제
+                Cursor.visible = true; //커서 보여주기
+                HoldPlayer(); //플레이어 행동 불가
+                SoundManager.Instance.StopSound(); //재생중이던 사운드들 일시 중지
+                UIManager.Instance.OpenMenu(); //메뉴 열어주기
+                break;
+
+            case eGameState.PlayerDead: //플레이어 사망 상태
+                StopCoroutine("Timer"); //타이머 중단
+                UIManager.Instance.GameResult(false, m_time, m_score); //게임 결과 화면 활성화 -> 시간과 점수를 넘겨줌
+                StartCoroutine("FailView"); //플레이어 사망 시 카메라 뷰 
+                m_player.gameObject.SetActive(false); //플레이어를 비활성화
+                break;
+
+            case eGameState.Success: //미션 성공 상태
+                StopCoroutine("Timer"); //타이머 중단
+                UIManager.Instance.CloseMenu(); //혹시 켜져있을 메뉴 닫아주기
+                UIManager.Instance.GameResult(true, m_time, m_score); //게임 결과 화면 활성화 -> 시간과 점수를 넘겨줌
+                Cursor.lockState = CursorLockMode.None; //커서 잠금해제
+                Cursor.visible = true; //커서 보여주기
+		HoldPlayer(); //플레이어 행동 불가
+                m_player.layer = LayerMask.NameToLayer("Default"); //적들이 공격하지 못하도록 레이어를 일시적으로 변경
+                break;
+        }
+    }
+    #endregion
+
+    #region Coroutine
+    IEnumerator FailView() //플레이어 사망 시 카메라 View
+    {
+        m_failViewCam = new GameObject("FailViewCam"); //게임오브젝트 생성
+        m_failViewCam.gameObject.AddComponent<Camera>(); //카메라 컴포넌트 부착
+        m_failViewCam.gameObject.AddComponent<AudioListener>(); //오디오리스너 부착 -> 플레이어가 사망 할 시 비활성화 되기 때문에 오디오리스너가 존재하지않게됨.
+
+        m_failViewCam.gameObject.transform.position = m_camera.transform.position; //플레이어 카메라 위치로 이동
+        m_failViewCam.gameObject.transform.eulerAngles = new Vector3(0f, m_camera.transform.eulerAngles.y, 0f); //플레이어가 바라보던 각도로 설정
+
+	//최종포지션
+        FailViewPosition = new Vector3(m_failViewCam.transform.position.x, m_failViewCam.transform.position.y + 2f, m_failViewCam.transform.position.z);
+
+        while (true)
+        {
+	    //보간을 이용해서 부드럽게 플레이어의 몸체를 바라보도록 회전
+            m_failViewCam.transform.rotation = Quaternion.Slerp(m_failViewCam.transform.rotation, Quaternion.Euler(90f, m_failViewCam.transform.eulerAngles.y, 0f), Time.deltaTime * 3f);
+	    //몸체를 위에서 내려다 볼 수 있게 포지션 이동
+            m_failViewCam.transform.position = Vector3.Lerp(m_failViewCam.transform.position, FailViewPosition, Time.deltaTime * 2f);
+            yield return null;
+		
+	    //최종포지션에 도착했다면 코루틴 중지
+            if(m_failViewCam.transform.position == FailViewPosition)
+            {
+                yield break;
+            }
+        }
+    }
+
+    IEnumerator Timer() //타이머
+    {
+        while(true)
+        {
+            yield return new WaitForSeconds(1f);
+
+            m_time++;
+        }
+    }
+
+    #endregion
+}
+```
+
+</div>
+</details>
+
 <br>
 
-### Feeling.:pencil:
+**Explanation**:mortar_board:<br>
+(구현설명은 주석으로 간단하게 처리했습니다!)<br>
+<br>
+*SoundManager*<br>
+싱글턴패턴을 적용한 SoundManager 같은 경우 모든 사운드클립 및 오디오소스를 관리하며 재생 및 중단을 수행하게끔 정리했습니다. 이를 통해 사운드 재생이 필요한 곳에서 쉽게 참조하여 간편하게 사용할 수 있었으며, 난무하는 오디오소스 컴포넌트를 방지할 수 있었습니다. 특히 3D사운드 재생에 관련해서는 생성, 삭제 과정의 오버헤드를 방지하기 위해 3D오디오소스를 부착한 오브젝트를 Object Pooling으로 관리하면서 사용합니다. 또한 오디오 과부하를 방지하기 위해 Object Pool에서 최대로 생성될 수 있는 갯수를 제한해, 동시에 재생될 수 있는 3D오디오소스 수를 제한했습니다.<br>
 
+*GameManager*<br>
+싱글턴패턴을 적용한 GameManager 같은 경우 현재 게임이 가질 수 있는 모든 상태를 열거형으로 선언한 후, FSM 방식으로 한 번에 하나의 상태만을 유지하며 해당 상태에서 처리해야 할 작업을
+수행하게끔 구현했습니다.
+
+<br>
+
+</div>
+</details>
+
+<br>
+
+<details>
+<summary>Optimization 접기/펼치기</summary>
+<div markdown="1">
+
+<br>
+
+**Explanation**:scissors:<br>
+* LightMap을 사용해, 실시간 조명연산을 최소화 시키고자 했습니다.
+* Occlusion Culling을 이용하여, 렌더링 작업을 최적화 시키고자 했습니다.
+* Object Pooling 기법을 사용하여, 반복되는 생성-삭제 작업으로인한 GC의 잦은 호출을 방지했습니다.
+* Atlas를 사용하여 드로우콜을 낮추고자 했습니다.
+
+<br>
+
+</div>
+</details>
+
+<br>
+
+### Difficult Point.:sweat_smile:
+* Unity를 이용해 게임 프로젝트를 처음 진행하다 보니, 설계에 있어 어려움을 겪었습니다. 이런저런 자료들을 많이 참고해봤지만, 직접 경험해보지 않아서인지
+와닿지 않았습니다. 그래서 이번 프로젝트만큼은 주먹구구식으로 덤벼들었던 것 같습니다. 그 결과 프로젝트를 검토해보니 중복되는 코드, 비효율적인 구조 등을
+발견하게 되었습니다. 하지만, 이번 프로젝트를 경험으로 적어도 Class들의 설계를 어떤 식으로 진행해야 할지 약간의 감을 잡을 수 있었고, 설계의 중요성을 다시 한번 느낄 수 있었습니다.
+
+* 앞서 말씀드렸다시피, 처음이었기 때문에 Unity 엔진의 기능들, MonoBehaviour 클래스에서 제공하는 기능들을 배우는 시간이 개발하는 시간보다 배로 많았던 점이 힘들었습니다. 하지만, 많은 기능을 알게 되었고 직접 사용해 볼 수 있었던 뜻깊은 경험이 되었으며, 게임 개발에 있어 자신감을 불어 넣어준 계기가 되기도 했습니다.
+
+<br>
 <br>
 
 
