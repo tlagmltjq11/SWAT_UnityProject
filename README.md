@@ -2,7 +2,7 @@
 프로젝트 설명은 아래 [링크](#1)를 통해 영상으로 확인할 수 있고, 코드와 같은 부가설명은 [About Dev](#2) 부분을 참고해주세요.<br>
 <br>
 
-### About Project.:two_men_holding_hands:
+### About Project.
 Irrational Games에서 개발한 택티컬 슈팅 게임 SWAT4를 모작한 프로젝트입니다.<br>
 <br>
 
@@ -11,7 +11,7 @@ Irrational Games에서 개발한 택티컬 슈팅 게임 SWAT4를 모작한 프�
 <br>
 <br>
 
-### About Dev.:nut_and_bolt: <div id="2"></div>
+### About Dev. <div id="2"></div>
 <br>
 
 <details>
@@ -581,7 +581,7 @@ public class ATW_Grenade : ATW
 
 <br>
 
-**Explanation**:gun:<br>
+**Explanation**<br>
 (구현설명은 주석으로 간단하게 처리했습니다!)<br>
 공통된 내용(필드나 메소드)들을 추출하고, 통일된 내용으로 작성하도록 상위 클래스인 Weapon, ATW 추상클래스를 구현했습니다. 모든 총기 및 투척무기 클래스는 해당 추상클래스를 상속받아, 
 각자 필요한 메소드나 필드만 추가로 정의하고, 추상 메소드를 오버라이딩하여 클래스마다 다르게 실행될 로직을 작성해 주면 됩니다. 이러한 구성을 통해서, 코드들을 규격화 할 수 있었고 
@@ -1435,7 +1435,7 @@ public class Hostage_Controller : MonoBehaviour
 
 <br>
 
-**Explanation**:wrench:<br>
+**Explanation**<br>
 (구현설명은 주석으로 간단하게 처리했습니다!)<br>
 적 AI 같은 경우, 상태들을 클래스로 관리하는 FSM으로 구현했습니다. 각 상태들은 싱글턴 패턴을 적용해 상태변환 시마다 new, delete가 난무하는 것을 예방함으로써, 오버헤드와 메모리 낭비를 방지하고자 했습니다. 또한 각 상태가 동일한 메소드(동작)를 포함하도록 강제하고, 다중상속 문제를 해결하며 다형성을 이용하기 위해 IFSM 인터페이스를 구현하도록 했습니다. 이러한 구조를 이용하니 클래스 간 느슨한 결합도를 유지할 수 있어서 Open-Closed Principle(확장에는 열리게 하고, 수정에는 닫히게 해야 한다는 객체지향 원칙)을 지킬 수 있었습니다. 또한, 구조가 심플하다 보니 개발하는 데 있어서 좀 더 수월해지는 이점도 존재했습니다.
 
@@ -1899,7 +1899,7 @@ public class GameManager : SingletonMonoBehaviour<GameManager>
 
 <br>
 
-**Explanation**:mortar_board:<br>
+**Explanation**<br>
 (구현설명은 주석으로 간단하게 처리했습니다!)<br>
 <br>
 *SoundManager*<br>
@@ -1922,7 +1922,7 @@ public class GameManager : SingletonMonoBehaviour<GameManager>
 
 <br>
 
-**Explanation**:scissors:<br>
+**Explanation**<br>
 * LightMap을 사용해, 실시간 조명연산을 최소화 시키고자 했습니다.
 * Occlusion Culling을 이용하여, 렌더링 작업을 최적화 시키고자 했습니다.
 * Object Pooling 기법을 사용하여, 반복되는 생성-삭제 작업으로인한 GC의 잦은 호출을 방지했습니다.
@@ -1935,7 +1935,7 @@ public class GameManager : SingletonMonoBehaviour<GameManager>
 
 <br>
 
-### Difficult Point.:sweat_smile:
+### Difficult Point.
 * Unity를 이용해 게임 프로젝트를 처음 진행하다 보니, 설계에 있어 어려움을 겪었습니다. 이런저런 자료들을 많이 참고해봤지만, 직접 경험해보지 않아서인지
 와닿지 않았습니다. 그래서 이번 프로젝트만큼은 주먹구구식으로 덤벼들었던 것 같습니다. 그 결과 프로젝트를 검토해보니 중복되는 코드, 비효율적인 구조 등을
 발견하게 되었습니다. 하지만, 이번 프로젝트를 경험으로 적어도 Class들의 설계를 어떤 식으로 진행해야 할지 약간의 감을 잡을 수 있었고, 설계의 중요성을 다시 한번 느낄 수 있었습니다.
