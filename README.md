@@ -6,7 +6,7 @@
 Irrational Games에서 개발한 택티컬 슈팅 게임 SWAT4를 모작한 프로젝트입니다.<br>
 <br>
 
-### Video.:video_camera: <div id="1">이미지를 클릭해주세요.</div>
+### Video. <div id="1">이미지를 클릭해주세요.</div>
 [![시연영상](https://img.youtube.com/vi/TNQ0OKnjaWw/0.jpg)](https://www.youtube.com/watch?v=TNQ0OKnjaWw)
 <br>
 <br>
